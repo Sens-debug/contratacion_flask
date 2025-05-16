@@ -1,0 +1,1 @@
+El principal objetivo del proyecto es simular el funcionamiento real de un aplicativo de contratacion, enviando archivos a través del protocolo HTTP
