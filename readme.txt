@@ -4,3 +4,6 @@ Se creó una carpeta Flask la cual contiene la logica del servidor, permitiendo 
 Tambien se establecio una interfaz tkinter que permite la seleccion y subida de un archivo a través de su PATH, conectandose a la URI del servidor Flask
 
 *   -Se requiere correr ambos scripts en consolas separadas para su correcto funcionamiento-*
+
+Se modifico el parametro 'host' a = '0.0.0.0' esto para permitir el intercambiar paquetes dentro de la misma red,
+puesto que esto me crea una IPPRIVADA más allá del LocalHost, lo cual me permite trabajar en la red
