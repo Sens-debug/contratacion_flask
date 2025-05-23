@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import mysql.connector
 import os
+import numpy as np
 
 conexion = mysql.connector.connect(
     host="localhost",
@@ -18,17 +19,40 @@ def verificar_inicio_sesion():
         usuario= datos.get("usuario")
         contraseña= datos.get("contrasena")
         cursor = conexion.cursor()
-        cursor.execute(f"select * from usuarios where nombre_usuario=%s and contraseña_usuario=%s",(usuario,contraseña))
+        cursor.execute(f"select * from usuarios where nombre_usuario=%s and contraseña_usuario=%s",(usuario,contraseña,))
         res=cursor.fetchone()
         
         if res:
-            id= res[0]
+            cargo_id= res[-1]
+            nombre_usuario = res[-3]
+            id_usuario = res[0]
             return jsonify({"estado":"aprobado",
-                            f"id":id}),200
+                            f"cargo_id":cargo_id,
+                            "nombre_usuario":f"{nombre_usuario}",
+                            "id_usuario":id_usuario
+                            }
+                            ),200
         else:
             return jsonify({"estado":"denegado"}),200
     finally:
         pass
+@app.route('/obtener_cantidad_archivos',methods=['POST'])
+def obtener_cantidad_archivos_a_subir():
+    datos = request.json
+    id_usuario = datos["id_usuario"]
+    cursor = conexion.cursor()
+    cursor.execute("select documentos.documento from usuarios INNER JOIN cargos on usuarios.cargo_id= cargos.id INNER JOIN documentosxcargo on documentosxcargo.cargo_id=cargos.id INNER JOIN documentos on documentos.id=documentosxcargo.documento_id where usuarios.id = %s ",(id_usuario,))
+    respuesta =cursor.fetchall()
+    print(respuesta)
+    if respuesta:
+        cantidad_elementos= len(respuesta)
+        elementos_array =np.array(respuesta)
+        print(respuesta)
+        return jsonify({"respuesta":respuesta,
+                        "cantidad_elementos":cantidad_elementos}),200
+    
+
+
 # @app.route('/subir', methods = ['POST'])
 # def subir_archivo():
 #     '''Funcion encargada de subir los archivos al servidor de archivos

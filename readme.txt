@@ -7,3 +7,5 @@ Tambien se establecio una interfaz tkinter que permite la seleccion y subida de 
 
 Se modifico el parametro 'host' a = '0.0.0.0' esto para permitir el intercambiar paquetes dentro de la misma red,
 puesto que esto me crea una IPPRIVADA más allá del LocalHost, lo cual me permite trabajar en la red
+
+Se deja un archivo .BD que constituye la query de inicializacion de la estructura de tablas -> Donde se manejara una estructura que permita ampliacion
