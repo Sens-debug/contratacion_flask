@@ -1,1 +1,27 @@
-venv
+# Flask
+venv 
+
+#REACT
+# Logs
+/frontend/react_app/logs
+/frontend/react_app/*.log
+/frontend/react_app/npm-debug.log*
+/frontend/react_app/yarn-debug.log*
+/frontend/react_app/yarn-error.log*
+/frontend/react_app/pnpm-debug.log*
+/frontend/react_app/lerna-debug.log*
+/frontend/react_app/node_modules
+/frontend/react_app/dist
+/frontend/react_app/dist-ssr
+/frontend/react_app/*.local
+
+/frontend/react_app/# Editor directories and files
+/frontend/react_app/.vscode/*
+/frontend/react_app/!.vscode/extensions.json
+/frontend/react_app/.idea
+/frontend/react_app/.DS_Store
+/frontend/react_app/*.suo
+/frontend/react_app/*.ntvs*
+/frontend/react_app/*.njsproj
+/frontend/react_app/*.sln
+/frontend/react_app/*.sw?
