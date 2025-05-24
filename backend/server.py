@@ -2,16 +2,17 @@ from flask import Flask, request, jsonify
 import mysql.connector
 import os
 import numpy as np
-
+from flask_cors import CORS
 conexion = mysql.connector.connect(
     host="localhost",
     user="root",
     password="",
-    database="prueba_contratacion"
+    database="try_contratacion"
 )
 
 app = Flask(__name__)
-
+#Los cors nos permiten trabajar con react
+CORS(app)
 @app.route('/inicio_sesion',methods=['POST'])
 def verificar_inicio_sesion():
     try:
@@ -50,8 +51,16 @@ def obtener_cantidad_archivos_a_subir():
         print(respuesta)
         return jsonify({"respuesta":respuesta,
                         "cantidad_elementos":cantidad_elementos}),200
-    
+    else: 
+        return jsonify({"respuesta":"imposible continuar"},400)
 
+@app.route('/obtener_usuarios', methods=['GET'])
+def obtener_usuarios():
+    cursor = conexion.cursor()
+    cursor.execute("select nombre_usuario from usuarios")
+    respuesta = cursor.fetchall()
+    print(respuesta)
+    return jsonify({"respuesta":respuesta})
 
 # @app.route('/subir', methods = ['POST'])
 # def subir_archivo():
