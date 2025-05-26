@@ -86,6 +86,7 @@ def obtener_usuarios():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    nombre_usuario = request.form.get('nombre_usuario')
     if not request.files:
         return jsonify({"mensaje": "No se enviaron archivos."}), 400
     archivos = request.files
@@ -103,14 +104,15 @@ def upload_file():
 
         tipo_mime = mime.from_buffer(contenido)
         print(f"{nombre_archivo} tipo: {tipo_mime}")
+        print(nombre_usuario)
 
         # if tipo_mime not in firmas_validas:
         #     errores.append(f"{nombre_archivo}: tipo no permitido ({tipo_mime})")
         #     continue
         
-        os.makedirs("archivos", exist_ok=True)
+        os.makedirs(f"archivos/{nombre_usuario}", exist_ok=True)
         print("aa")
-        with open(f"archivos/{nombre_archivo}_{archivo.filename}", "wb") as f:
+        with open(f"archivos/{nombre_usuario}/{nombre_archivo}_{archivo.filename}", "wb") as f:
             f.write(contenido)
 
     if errores:
