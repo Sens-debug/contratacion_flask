@@ -24,4 +24,8 @@ create table documentosxcargo(cargo_id INT,
                              FOREIGN KEY (documento_id) REFERENCES documentos(id)
                              );
                      
-                     
+
+INSERT INTO `documentos` (`id`, `documento`) VALUES (NULL, 'cedula_ciudadania'), (NULL, 'hoja_de_vida'), (NULL, 'carnet_vacunacion');
+INSERT INTO `cargos` (`id`, `Cargo`) VALUES (NULL, 'Cuidador'), (NULL, 'Auxiliar_Enfermeria');
+INSERT INTO `documentosxcargo` (`cargo_id`, `documento_id`) VALUES ('1', '1'), ('1', '2'), ('2', '1'), ('2', '2'), ('2', '3');
+INSERT INTO `usuarios` (`id`, `primer_nombre`, `segundo_nombre`, `primer_apellido`, `segundo_apellido`, `correo`, `telefono`, `nombre_usuario`, `contraseña_usuario`, `cargo_id`) VALUES (NULL, 'Jose', NULL, 'Arbelaez', NULL, NULL, NULL, 'JA', '123', '1'), (NULL, 'Maria', NULL, 'Magdalena', NULL, NULL, NULL, 'MM', '321', '2');
