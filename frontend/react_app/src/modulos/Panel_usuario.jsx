@@ -42,6 +42,7 @@ function Panel_usuario(){
         for (const nombre in archivo){
             datos_formulario.append(nombre,archivo[nombre]);
         }
+        datos_formulario.append("nombre_usuario",datos_recibidos_login.primer_nombre+' '+datos_recibidos_login.primer_apellido)
         
         
         try{
@@ -74,7 +75,7 @@ function Panel_usuario(){
                     </div>
                 ))}
                 <button type="submit">Subir</button>
-                <p>{estado_subida.mensaje}</p>
+                <p>{estado_subida}</p>
             </form>
             <button onClick={cerrar_sesion}>Cerrar Sesion</button>
         </div>

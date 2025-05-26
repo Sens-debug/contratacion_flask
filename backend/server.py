@@ -98,9 +98,9 @@ def upload_file():
     for nombre_archivo, archivo in archivos.items():
         contenido = archivo.read()
 
-        if not contenido:
-            errores.append(f"{nombre_archivo}: archivo vacío.")
-            continue
+        # if not contenido:
+        #     errores.append(f"{nombre_archivo}: archivo vacío.")
+        #     continue
 
         tipo_mime = mime.from_buffer(contenido)
         print(f"{nombre_archivo} tipo: {tipo_mime}")
