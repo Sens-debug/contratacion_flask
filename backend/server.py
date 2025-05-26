@@ -3,6 +3,7 @@ import mysql.connector
 import os
 import numpy as np
 from flask_cors import CORS
+import magic
 
 def obtener_conexion_bd():
     return mysql.connector.connect(
@@ -52,18 +53,21 @@ def obtener_cantidad_archivos_a_subir():
     conexion = obtener_conexion_bd()
     datos = request.json
     id_usuario = datos.get("id_usuario")
-    print(datos, id_usuario)
+    print(datos)
     cursor = conexion.cursor(buffered=True)
-    cursor.execute("select documentos.documento from usuarios INNER JOIN cargos on usuarios.cargo_id= cargos.id INNER JOIN documentosxcargo on documentosxcargo.cargo_id=cargos.id INNER JOIN documentos on documentos.id=documentosxcargo.documento_id where usuarios.id = %s ",(id_usuario,))
+    cursor.execute("""select documentos.documento from usuarios 
+                   INNER JOIN cargos on usuarios.cargo_id= cargos.id 
+                   INNER JOIN documentosxcargo on documentosxcargo.cargo_id=cargos.id 
+                   INNER JOIN documentos on documentos.id=documentosxcargo.documento_id 
+                   where usuarios.id = %s """,(id_usuario,))
     respuesta =cursor.fetchall()
     print(respuesta)
     cursor.close()
     conexion.close()
     if respuesta:
-        print(respuesta)
+        
         cantidad_elementos= len(respuesta)
         elementos_array =np.array(respuesta)
-        print(respuesta) 
         return jsonify({"respuesta":respuesta,
                         "cantidad_elementos":cantidad_elementos}),200
     else: 
@@ -80,32 +84,42 @@ def obtener_usuarios():
     conexion.close()
     return jsonify({"respuesta":respuesta})
 
-# @app.route('/subir', methods = ['POST'])
-# def subir_archivo():
-#     '''Funcion encargada de subir los archivos al servidor de archivos
-#     No recibe parametros, metodo Post'''
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if not request.files:
+        return jsonify({"mensaje": "No se enviaron archivos."}), 400
+    archivos = request.files
+    firmas_validas = ['image/jpeg', 'image/png', 'application/pdf']
+    errores = []
+    print(archivos)
+    mime = magic.Magic(mime=True)  # Usa instancia segura
 
+    for nombre_archivo, archivo in archivos.items():
+        contenido = archivo.read()
 
-#     carpeta_subida = 'nuevos'
-#     #Crea una carpeta nueva, si existe la selecciona, si no existe la crea ->No levanta excepcion si ya existe
-#     os.makedirs(carpeta_subida, exist_ok=True)
-#     #Establece la ruta en la que se va a ejecitar esta funcion y el metodo que manejará
+        if not contenido:
+            errores.append(f"{nombre_archivo}: archivo vacío.")
+            continue
 
-#     #si la peticion no contiene ningun archuvo entonces accede al early return(STATUS_CODE=400)
-#     if 'file' not in request.files:
-#         return 'No hay archivo en la peticion', 400
-    
-#     archivo = request.files['file']
-#     #Si el archivo no tiene nombre accede al early return (STATUS_CODE=400)
-#     if archivo.filename == '':
-#         return 'No selected file', 400
-    
-#     #Crea la ruta de archivo en una variable, compuesta por (PATH_PROYECTO+CARPETA_SUBIDA+NOMBRE_ARCHIVO)
-#     ruta_del_archivo = os.path.join(carpeta_subida, archivo.filename)
-#     #Guarda el archivo en la ruta
-#     archivo.save(ruta_del_archivo)
-#     #Si llega hasta este punto entonces accede al return que entrega el mensaje de "Archivo subido satisfactoriamente (STATUS_CODE=200)"
-#     return f'Archivo {archivo.filename} se ha subido satisfactoriamente', 200
+        tipo_mime = mime.from_buffer(contenido)
+        print(f"{nombre_archivo} tipo: {tipo_mime}")
+
+        # if tipo_mime not in firmas_validas:
+        #     errores.append(f"{nombre_archivo}: tipo no permitido ({tipo_mime})")
+        #     continue
+        
+        os.makedirs("archivos", exist_ok=True)
+        print("aa")
+        with open(f"archivos/{nombre_archivo}_{archivo.filename}", "wb") as f:
+            f.write(contenido)
+
+    if errores:
+        return jsonify({
+            "mensaje": "Algunos archivos no se subieron.",
+            "errores": errores
+        }), 400
+
+    return jsonify({"mensaje": "Archivos subidos correctamente."}), 200
 
 if __name__ == '__main__':  
     app.run(debug=True,  host= '0.0.0.0' ,port=5000)
