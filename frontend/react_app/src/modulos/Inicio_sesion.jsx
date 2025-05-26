@@ -15,7 +15,7 @@ export function Formulario_login(){
     const manejarEnvio =(variableControl) => {
         variableControl.preventDefault();
         //Hace un fetch a la url del backend
-        fetch('http://192.168.11.176:5000/inicio_sesion',{
+        fetch('http://192.168.0.106:5000/inicio_sesion',{
             //Especifica el metodo del fetch 'post'
             method: 'POST',
             //Marca que se va a enviar un formato JSON

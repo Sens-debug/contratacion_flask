@@ -24,7 +24,12 @@ def verificar_inicio_sesion():
         usuario= datos.get("usuario")
         contraseña= datos.get("contraseña")
         cursor = conexion.cursor(buffered=True)
-        cursor.execute(f"select usuarios.primer_nombre, usuarios.primer_apellido, usuarios.correo,cargos.Cargo, cargos.id, usuarios.id from usuarios INNER JOIN cargos on cargos.id = usuarios.cargo_id INNER JOIN documentosxcargo on documentosxcargo.cargo_id=cargos.id INNER JOIN documentos on documentos.id=documentosxcargo.documento_id where nombre_usuario=%s and contraseña_usuario=%s",(usuario,contraseña,))
+        cursor.execute(f"""select usuarios.primer_nombre, usuarios.primer_apellido, usuarios.correo,cargos.Cargo, cargos.id, usuarios.id 
+                       from usuarios 
+                       INNER JOIN cargos on cargos.id = usuarios.cargo_id 
+                       INNER JOIN documentosxcargoxestado on documentosxcargoxestado.cargo_id=cargos.id 
+                       INNER JOIN documentos on documentos.id=documentosxcargoxestado.documento_id 
+                       where nombre_usuario=%s and contraseña_usuario=%s""",(usuario,contraseña,))
         res=cursor.fetchone()
         cursor.close()
         conexion.close()
@@ -55,11 +60,24 @@ def obtener_cantidad_archivos_a_subir():
     id_usuario = datos.get("id_usuario")
     print(datos)
     cursor = conexion.cursor(buffered=True)
-    cursor.execute("""select documentos.documento from usuarios 
-                   INNER JOIN cargos on usuarios.cargo_id= cargos.id 
-                   INNER JOIN documentosxcargo on documentosxcargo.cargo_id=cargos.id 
-                   INNER JOIN documentos on documentos.id=documentosxcargo.documento_id 
-                   where usuarios.id = %s """,(id_usuario,))
+    cursor.execute("""SELECT 
+    u.id AS usuario_id,
+    CONCAT(u.primer_nombre, ' ', u.primer_apellido) AS nombre_completo,
+    c.Cargo AS nombre_cargo,
+    e.estado AS estado_usuario,
+    d.documento AS documento_requerido
+    FROM usuarios u
+    -- Relación con cargo
+    INNER JOIN cargos c ON u.cargo_id = c.id
+    -- Relación con el estado actual del usuario
+    INNER JOIN usuariosxestado ue ON u.id = ue.id_usuario
+    INNER JOIN estados e ON ue.estado_id = e.id
+    -- Relación con documentos requeridos por cargo y estado
+    INNER JOIN documentosxcargoxestado dce 
+        ON dce.cargo_id = u.cargo_id AND dce.estado_id = ue.estado_id
+    -- Relación con los nombres de documentos
+    INNER JOIN documentos d ON d.id = dce.documento_id
+ = %s; """,(id_usuario,))
     respuesta =cursor.fetchall()
     print(respuesta)
     cursor.close()
@@ -106,9 +124,9 @@ def upload_file():
         print(f"{nombre_archivo} tipo: {tipo_mime}")
         print(nombre_usuario)
 
-        # if tipo_mime not in firmas_validas:
-        #     errores.append(f"{nombre_archivo}: tipo no permitido ({tipo_mime})")
-        #     continue
+        if tipo_mime not in firmas_validas:
+            errores.append(f"{nombre_archivo}: tipo no permitido ({tipo_mime})")
+            continue
         
         os.makedirs(f"archivos/{nombre_usuario}", exist_ok=True)
         print("aa")
@@ -122,6 +140,19 @@ def upload_file():
         }), 400
 
     return jsonify({"mensaje": "Archivos subidos correctamente."}), 200
+@app.route('/campos_creacion_usuario', methods =['GET'])
+def obtener_campos_crear_usuarios():
+    conexion =obtener_conexion_bd()
+    cursor = conexion.cursor(buffered=True)
+    cursor.execute("""SELECT COLUMN_NAME 
+                   FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = 'usuarios'
+                    and TABLE_SCHEMA = 'try_contratacion'""")
+    columnas_base_datos = cursor.fetchall()
+    retorno = {}
+    for columna in columnas_base_datos:
+        retorno[str(columna[0])]=columna[0]
+    return jsonify({'retorno':retorno})
 
 if __name__ == '__main__':  
     app.run(debug=True,  host= '0.0.0.0' ,port=5000)
