@@ -11,7 +11,6 @@ function Panel_usuario(){
     const [estado_subida, set_estado_subida] = useState('')
     const navegacion = useNavigate();
 
-    console.log(datos_recibidos_login)
 
     function cerrar_sesion(){
         navegacion("/")
@@ -24,7 +23,7 @@ function Panel_usuario(){
         const [segundo_apellido , set_segundo_apellido] = useState('')
         const [elementos_creacion_usuario,set_elementos_creacion_usuario] = useState({})
         useEffect (()=>{
-            fetch('http://192.168.0.106:5000/campos_creacion_usuario').then(respuesta=>respuesta.json()).then(data =>set_elementos_creacion_usuario(data.retorno))
+            fetch('http://192.168.0.110:5000/campos_creacion_usuario').then(respuesta=>respuesta.json()).then(data =>set_elementos_creacion_usuario(data.retorno))
             
         })
         
@@ -41,7 +40,7 @@ function Panel_usuario(){
     
 
     useEffect(()=>{
-        fetch('http://192.168.0.106:5000/obtener_cantidad_archivos',{
+        fetch('http://192.168.0.110:5000/obtener_cantidad_archivos',{
             method :'POST',
             headers:{"Content-Type":"application/json"},
             body: JSON.stringify({"id_usuario":datos_recibidos_login.id_usuario}),
@@ -49,7 +48,7 @@ function Panel_usuario(){
         .then(respuesta => respuesta.json())
         .then(data=> {set_documentos_necesarios(data.respuesta||[])})
     },[]);
-
+       
     
 
     const manejar_cambio_archivo =(v_control_cambio,nombre_documento)=>{
@@ -70,7 +69,7 @@ function Panel_usuario(){
         
         
         try{
-            fetch("http://192.168.0.106:5000/upload",{
+            fetch("http://192.168.0.110:5000/upload",{
                 method:'POST',
                 body:datos_formulario,
             }).then(respuesta => respuesta.json())
@@ -95,7 +94,6 @@ function Panel_usuario(){
                         <label>{item}</label>
                         <input 
                         type="file"
-                        
                         onChange={(e) =>manejar_cambio_archivo(e,item)} />
                     </div>
                 ))}

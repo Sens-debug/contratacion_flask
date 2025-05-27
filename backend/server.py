@@ -61,10 +61,6 @@ def obtener_cantidad_archivos_a_subir():
     print(datos)
     cursor = conexion.cursor(buffered=True)
     cursor.execute("""SELECT 
-    u.id AS usuario_id,
-    CONCAT(u.primer_nombre, ' ', u.primer_apellido) AS nombre_completo,
-    c.Cargo AS nombre_cargo,
-    e.estado AS estado_usuario,
     d.documento AS documento_requerido
     FROM usuarios u
     -- Relación con cargo
@@ -130,13 +126,12 @@ def upload_file():
         
         os.makedirs(f"archivos/{nombre_usuario}", exist_ok=True)
         print("aa")
-        with open(f"archivos/{nombre_usuario}/{nombre_archivo}_{archivo.filename}", "wb") as f:
+        with open(f"archivos/{nombre_usuario}/{nombre_archivo}_{nombre_usuario}", "wb") as f:
             f.write(contenido)
 
     if errores:
         return jsonify({
-            "mensaje": "Algunos archivos no se subieron.",
-            "errores": errores
+            "mensaje": f"Algunos archivos no se subieron.{errores}"
         }), 400
 
     return jsonify({"mensaje": "Archivos subidos correctamente."}), 200
