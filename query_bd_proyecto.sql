@@ -63,8 +63,7 @@ create table usuariosxestado(id_usuario int ,
  
 
 
-INSERT INTO `estados` (`id`, `estado`) VALUES (NULL, 'sel'), (NULL, 'contra'), (NULL, 'cancel');
-
+INSERT INTO `estados` (`id`, `estado`) VALUES (NULL, 'seleccion'), (NULL, 'contratacion'), (NULL, 'cancelado'), (Null, 'completado');
 
 
 INSERT INTO `cargos` (`id`, `Cargo`) VALUES (NULL, 'antibiotico'), (NULL, 'cuidador'), (NULL, 'permanente'), (NULL, 'nutricion'), (NULL, 'medico'), (NULL, 'psicologia'),(NULL, 'auditor'), (NULL, 'fisio_terapia'), (NULL, 'terapia_respiratoria'), (NULL, 'terapia_ocupacional'), (NULL, 'administrativo');
