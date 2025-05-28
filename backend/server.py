@@ -129,6 +129,8 @@ def upload_file():
         with open(f"archivos/{nombre_usuario}/{nombre_archivo}_{nombre_usuario}", "wb") as f:
             f.write(contenido)
 
+        # Firma de los formatos posterior a subir la firma
+
     if errores:
         return jsonify({
             "mensaje": f"Algunos archivos no se subieron.{errores}"
