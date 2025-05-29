@@ -4,6 +4,11 @@ import os
 import numpy as np
 from flask_cors import CORS
 import magic
+import fitz  # Para PDF
+from PIL import Image
+import io
+
+import firma_fomatos.firma_documentos
 
 def obtener_conexion_bd():
     return mysql.connector.connect(
@@ -100,7 +105,21 @@ def obtener_usuarios():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    nombre_usuario = request.form.get('nombre_usuario')
+    id_usuario = request.form.get('id_usuario')
+    cargo = request.form.get("cargo")
+    print(f"id buscado {id_usuario}")
+
+    conexion = obtener_conexion_bd()
+    cursor = conexion.cursor()
+    cursor.execute(f"""select 
+                  upper(CONCAT_WS(' ', primer_nombre, segundo_nombre, primer_apellido, segundo_apellido))
+                   from usuarios where id =%s 
+                    """,(id_usuario,))
+    nombre_completo = cursor.fetchone()[0]
+    print(nombre_completo)
+    cursor.close()
+    conexion.close()
+
     if not request.files:
         return jsonify({"mensaje": "No se enviaron archivos."}), 400
     archivos = request.files
@@ -118,17 +137,57 @@ def upload_file():
 
         tipo_mime = mime.from_buffer(contenido)
         print(f"{nombre_archivo} tipo: {tipo_mime}")
-        print(nombre_usuario)
+       
 
         if tipo_mime not in firmas_validas:
             errores.append(f"{nombre_archivo}: tipo no permitido ({tipo_mime})")
             continue
-        
-        os.makedirs(f"archivos/{nombre_usuario}", exist_ok=True)
-        print("aa")
-        with open(f"archivos/{nombre_usuario}/{nombre_archivo}_{nombre_usuario}", "wb") as f:
-            f.write(contenido)
 
+        # Verificacion profunda de los pdf
+        if tipo_mime == 'application/pdf':
+            try:
+                with fitz.open(stream=contenido, filetype="pdf") as doc:
+                    if doc.page_count == 0:
+                        raise ValueError("El PDF no tiene páginas.")
+            except Exception as e:
+                errores.append(f"{nombre_archivo}: PDF no válido ({e})")
+                continue
+                
+        # Verificacion profunda imagen
+        elif tipo_mime in ['image/jpeg', 'image/png']:
+            try:
+                image = Image.open(io.BytesIO(contenido))
+                image.verify()  # Verifica que la imagen no está corrupta
+                # Opcional: cargar realmente para validar más
+                image = Image.open(io.BytesIO(contenido))
+                image.load()
+                # Opcional: validar tamaño mínimo, por ejemplo
+            except Exception as e:
+                errores.append(f"{nombre_archivo}: imagen no válida ({e})")
+                continue
+
+        
+
+        
+        # os.makedirs(f"archivos/{nombre_usuario}", exist_ok=True)
+        # print("aa")
+        ruta_carpeta_script = os.path.dirname(__file__)
+        ruta_carpeta_archivos = os.path.join(ruta_carpeta_script,"archivos")
+        
+        os.makedirs(fr"{ruta_carpeta_archivos}\{nombre_completo}", exist_ok=True)
+        ruta_carpeta_persona  = os.path.join(ruta_carpeta_archivos,nombre_completo)
+        
+        try:
+            with open(fr"{ruta_carpeta_persona}\{nombre_archivo}_{nombre_completo}.pdf" ,"wb") as f:
+                f.write(contenido)
+                print(" es escribio")
+        except Exception as e:
+            errores.append({"no cargó el archivo":e})
+
+        from firma_fomatos.firma_documentos import Firma_documentos
+        firma =Firma_documentos('','','DSFD','DFS',nombre_completo,'','96851577','ipstid@ipstid.com','255524','pp','','0+',ruta_carpeta_persona)
+        
+        firma.firmar_formatos_administrativo()
         # Firma de los formatos posterior a subir la firma
 
     if errores:
@@ -137,6 +196,7 @@ def upload_file():
         }), 400
 
     return jsonify({"mensaje": "Archivos subidos correctamente."}), 200
+
 @app.route('/campos_creacion_usuario', methods =['GET'])
 def obtener_campos_crear_usuarios():
     conexion =obtener_conexion_bd()

@@ -65,7 +65,8 @@ function Panel_usuario(){
         for (const nombre in archivo){
             datos_formulario.append(nombre,archivo[nombre]);
         }
-        datos_formulario.append("nombre_usuario",datos_recibidos_login.primer_nombre+' '+datos_recibidos_login.primer_apellido)
+        datos_formulario.append("id_usuario",datos_recibidos_login.id_usuario)
+        datos_formulario.append("cargo",datos_recibidos_login.cargo)
         
         
         try{

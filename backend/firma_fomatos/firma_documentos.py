@@ -37,7 +37,8 @@ class Firma_documentos():
     def __init__(self, primer_nombre,segundo_nombre,
                  primer_apellido,segundo_apellido,
                  nombre_completo,direccion_residencia,cedula_ciudadania,
-                 correo_electronico,telefono,area,tipo_ingreso,tipo_sangre):
+                 correo_electronico,telefono,area,tipo_ingreso,tipo_sangre,
+                 ruta_de_almacenamiento):
         
         self.nombre_completo=nombre_completo
         self.primer_nombre=primer_nombre
@@ -56,6 +57,7 @@ class Firma_documentos():
         #obtiene la ruta del script, el cual debe compartir carpeta con la carpeta contenedora de los formatos
         ruta_script=__file__
         self.ruta_carpetas_plantillas = os.path.join(os.path.dirname(ruta_script),'Plantillas')
+        self.ruta_almacenamiento = ruta_de_almacenamiento
 
     def firmar_formatos_administrativo(self):
         ruta_firma = r"C:\Users\Sistemas\Desktop\try_contratacion\backend\firma_fomatos\firma_prueba.jpg"
@@ -72,6 +74,11 @@ class Firma_documentos():
             ruta_formato = os.path.join(ruta_carpeta_plantilla_administrativos,i)
             # Aplicamos string slicing para eliminar los ultimos 5 caracteres(.docx)
             nombre_archivo = os.path.basename(ruta_formato)[:-5]
+            
+            '''Valido solo en windows
+             nombre_archivo=ruta_formato.split("\\")
+             print(nombre_archivo[-1])
+            '''
 
             print(nombre_archivo)
             documento_plantilla = DocxTemplate(ruta_formato)
@@ -84,10 +91,10 @@ class Firma_documentos():
             'segundo_nombre':'Miguel',
             'primer_apellido':'Ecele',
             'segundo_apellido':'Gutierrez',
-            'nombre_completo': 'Juan Maicol ',
+            'nombre_completo': self.nombre_completo,
             'direccion_residencia':'cl 777 # 888 9876',
-            'cedula_ciudadania':'0987654321',
-            'correo_electronico':'icfne@inc.com',
+            'cedula_ciudadania':self.cedula_ciudadania,
+            'correo_electronico':self.correo_electronico,
             'cargo': 'Sistemas',
             'area': 'Administrativa',
             'tipo_sangre':'AB+',
@@ -101,20 +108,16 @@ class Firma_documentos():
         }
             documento_plantilla.render(datos_a_diligenciar)
             
-            # print(ruta_formato)
-
-            '''Valido solo en windows
-             nombre_archivo=ruta_formato.split("\\")
-             print(nombre_archivo[-1])
-            '''
-            documento_plantilla.save(f'{self.ruta_carpetas_plantillas}\\Formatos_Firmados\\{nombre_archivo}_{datos_a_diligenciar["nombre_completo"]}_{datos_a_diligenciar["cedula_ciudadania"]}.docx')
+            # creamos la carpeta de la persona
+            # os.makedirs(f"{self.ruta_almacenamiento}\\{datos_a_diligenciar['nombre_completo']}", exist_ok=True)
+            documento_plantilla.save(f'{self.ruta_almacenamiento}\\{nombre_archivo}_{datos_a_diligenciar["nombre_completo"]}_{datos_a_diligenciar["cedula_ciudadania"]}.docx')
 
         print(ruta_carpeta_plantilla_administrativos)
 
 
     def firmar_formatos_antibiotico(self):
         ruta_carpeta_plantilla_antibioticos= os.path.join(self.ruta_carpetas_plantillas, 'Plantillas_antibioticos')
-        ruta_firma = ruta_firma = r"C:\Users\Sistemas\Desktop\try_contratacion\backend\firma_fomatos\firma_prueba.jpg"
+        ruta_firma = r"C:\Users\Sistemas\Desktop\try_contratacion\backend\firma_fomatos\firma_prueba.jpg"
 
         # List comprehension
         archivos_antibioticos = [i for i in os.listdir(ruta_carpeta_plantilla_antibioticos)
@@ -122,9 +125,10 @@ class Firma_documentos():
                                  and i.endswith('.docx')]
         for i in archivos_antibioticos:
             ruta_formato = os.path.join(ruta_carpeta_plantilla_antibioticos,i)
-            nombre_archivo = os.path.basename(ruta_formato)[:-3]
+            nombre_archivo = os.path.basename(ruta_formato)[:-5]
             documento_plantilla = DocxTemplate(ruta_formato)
-            imagen_firma = InlineImage(documento_plantilla,ruta_firma, width=40)
+            imagen_firma = InlineImage(documento_plantilla,ruta_firma, width=Mm(40))
+            print(nombre_archivo)
             datos_a_diligenciar ={
             'primer_nombre':'Juan',
             'segundo_nombre':'Miguel',
@@ -134,7 +138,7 @@ class Firma_documentos():
             'direccion_residencia':'cl 777 # 888 9876',
             'cedula_ciudadania':'0987654321',
             'correo_electronico':'icfne@inc.com',
-            'cargo': 'Sistemas',
+            'cargo': 'Antibiotico',
             'area': 'Administrativa',
             'tipo_sangre':'AB+',
             'fecha_nacimiento':'1879/12/12',
@@ -146,8 +150,11 @@ class Firma_documentos():
             'firma': imagen_firma
         }
             documento_plantilla.render(datos_a_diligenciar)
-            documento_plantilla.save(f'{self.ruta_carpetas_plantillas}\\Formatos_Firmados\\{nombre_archivo}_{datos_a_diligenciar[nombre_archivo]}_{datos_a_diligenciar["cedula_ciudadania"]}')
+            os.makedirs(f"{self.ruta_carpetas_plantillas}\\Formatos_Firmados\\Antibiotico\\{datos_a_diligenciar['nombre_completo']}", exist_ok=True)
+            documento_plantilla.save(f'{self.ruta_carpetas_plantillas}\\Formatos_Firmados\\Antibiotico\\{nombre_archivo}_{datos_a_diligenciar["nombre_completo"]}_{datos_a_diligenciar["cedula_ciudadania"]}.docx')
 
-        pass
+        
 
-Firma_documentos('','','','','','','','','','','','').firmar_formatos_administrativo()
+# signer =Firma_documentos('','','','','','','','','','','','')
+# signer.firmar_formatos_administrativo()
+# signer.firmar_formatos_antibiotico()
