@@ -10,7 +10,7 @@ function Panel_usuario(){
     const [documentos_necesarios, set_documentos_necesarios] = useState([])
     const [estado_subida, set_estado_subida] = useState('')
     const navegacion = useNavigate();
-
+    const uri_flask = import.meta.env.VITE_URL_SERVIDOR
 
     function cerrar_sesion(){
         navegacion("/")
@@ -23,7 +23,7 @@ function Panel_usuario(){
         const [segundo_apellido , set_segundo_apellido] = useState('')
         const [elementos_creacion_usuario,set_elementos_creacion_usuario] = useState({})
         useEffect (()=>{
-            fetch('http://192.168.0.110:5000/campos_creacion_usuario').then(respuesta=>respuesta.json()).then(data =>set_elementos_creacion_usuario(data.retorno))
+            fetch(uri_flask+'/campos_creacion_usuario').then(respuesta=>respuesta.json()).then(data =>set_elementos_creacion_usuario(data.retorno))
             
         })
         
@@ -40,7 +40,7 @@ function Panel_usuario(){
     
 
     useEffect(()=>{
-        fetch('http://192.168.0.110:5000/obtener_cantidad_archivos',{
+        fetch(uri_flask+'/obtener_cantidad_archivos',{
             method :'POST',
             headers:{"Content-Type":"application/json"},
             body: JSON.stringify({"id_usuario":datos_recibidos_login.id_usuario}),
@@ -65,12 +65,20 @@ function Panel_usuario(){
         for (const nombre in archivo){
             datos_formulario.append(nombre,archivo[nombre]);
         }
-        datos_formulario.append("id_usuario",datos_recibidos_login.id_usuario)
+        datos_formulario.append("nombre_completo",datos_recibidos_login.nombre_completo)
+        datos_formulario.append("direccion",datos_recibidos_login.direccion)
+        datos_formulario.append("cedula",datos_recibidos_login.cedula)
+        datos_formulario.append("correo",datos_recibidos_login.correo)
         datos_formulario.append("cargo",datos_recibidos_login.cargo)
-        
+        datos_formulario.append("cargo_id",datos_recibidos_login.cargo_id)
+        datos_formulario.append("area",datos_recibidos_login.area)
+        datos_formulario.append("rh",datos_recibidos_login.rh)
+        datos_formulario.append("f_nacimiento",datos_recibidos_login.f_nacimiento)
+        datos_formulario.append("tel",datos_recibidos_login.tel)
+        datos_formulario.append("id_usuario",datos_recibidos_login.id_usuario)
         
         try{
-            fetch("http://192.168.0.110:5000/upload",{
+            fetch(uri_flask+"/upload",{
                 method:'POST',
                 body:datos_formulario,
             }).then(respuesta => respuesta.json())
@@ -84,23 +92,29 @@ function Panel_usuario(){
 
     return(
         <div>
-            <h2>{datos_recibidos_login.cargo}</h2>
-            <h2>{datos_recibidos_login.primer_nombre+' '+datos_recibidos_login.primer_apellido}</h2>
-            <h2></h2>
+            <div>
+                <h2>{datos_recibidos_login.cargo}</h2>
+                <h2>{datos_recibidos_login.nombre_completo}</h2>
+                <h2></h2>
+            </div>
 
-            {/* Vamos a usar un map para iterar sobre nuestro JSON, el map nos pide un oarametro item, y se expresa una funcion flecha */}
-            <form onSubmit={manejarEnvio}>
-                {documentos_necesarios.map((item)=> (
-                    <div>
-                        <label>{item}</label>
-                        <input 
-                        type="file"
-                        onChange={(e) =>manejar_cambio_archivo(e,item)} />
-                    </div>
-                ))}
-                <button type="submit">Subir</button>
-                <p>{estado_subida}</p>
-            </form>
+            <div>
+                {/* Vamos a usar un map para iterar sobre nuestro JSON, el map nos pide un oarametro item, y se expresa una funcion flecha */}
+                <form onSubmit={manejarEnvio}>
+                    {documentos_necesarios.map((item)=> ( 
+                        <div>
+                            <label>{item}</label>
+                            <input 
+                            type="file"
+                            onChange={(e) =>manejar_cambio_archivo(e,item)} />
+                        </div>
+                    ))}
+                    <br />
+                    
+                    <button type="submit">Subir</button>
+                    <p>{estado_subida}</p>
+                </form>
+            </div>
             <button onClick={cerrar_sesion}>Cerrar Sesion</button>
         </div>
     )

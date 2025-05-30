@@ -34,30 +34,25 @@ variables = {'fecha':strign_fecha,
 
 
 class Firma_documentos():
-    def __init__(self, primer_nombre,segundo_nombre,
-                 primer_apellido,segundo_apellido,
+    def __init__(self,
                  nombre_completo,direccion_residencia,cedula_ciudadania,
-                 correo_electronico,telefono,area,tipo_ingreso,tipo_sangre,
-                 ruta_de_almacenamiento):
+                 correo_electronico,telefono,area,cargo,tipo_sangre,fecha_nacimiento, ruta_carpeta_persona
+                 ):
         
         self.nombre_completo=nombre_completo
-        self.primer_nombre=primer_nombre
-        self.segundo_nombre=segundo_nombre
-        self.primer_apellido=primer_apellido
-        self.segundo_apellido=segundo_apellido
         self.direccion_residencia=direccion_residencia
         self.cedula_ciudadania=cedula_ciudadania
         self.correo_electronico=correo_electronico
         self.telefono=telefono
         self.area=area
-        self.tipo_ingreso=tipo_ingreso
+        self.cargo=cargo
         self.tipo_sangre=tipo_sangre
+        self.ruta_carpeta_persona = ruta_carpeta_persona
         
 
         #obtiene la ruta del script, el cual debe compartir carpeta con la carpeta contenedora de los formatos
         ruta_script=__file__
         self.ruta_carpetas_plantillas = os.path.join(os.path.dirname(ruta_script),'Plantillas')
-        self.ruta_almacenamiento = ruta_de_almacenamiento
 
     def firmar_formatos_administrativo(self):
         ruta_firma = r"C:\Users\Sistemas\Desktop\try_contratacion\backend\firma_fomatos\firma_prueba.jpg"
@@ -80,24 +75,20 @@ class Firma_documentos():
              print(nombre_archivo[-1])
             '''
 
-            print(nombre_archivo)
+           
             documento_plantilla = DocxTemplate(ruta_formato)
             
             # listado_formatos.append({'formato':nombre_archivo,'documento_procesado':documento_plantilla})
             
             imagen_firma = InlineImage(documento_plantilla,ruta_firma, width=Mm(40))
             datos_a_diligenciar ={
-            'primer_nombre':'Juan',
-            'segundo_nombre':'Miguel',
-            'primer_apellido':'Ecele',
-            'segundo_apellido':'Gutierrez',
             'nombre_completo': self.nombre_completo,
-            'direccion_residencia':'cl 777 # 888 9876',
+            'direccion_residencia':self.direccion_residencia,
             'cedula_ciudadania':self.cedula_ciudadania,
             'correo_electronico':self.correo_electronico,
-            'cargo': 'Sistemas',
-            'area': 'Administrativa',
-            'tipo_sangre':'AB+',
+            'cargo': self.cargo,
+            'area': self.area,
+            'tipo_sangre':self.tipo_sangre,
             'fecha_nacimiento':'1879/12/12',
             'fecha_actual':f"{datetime.datetime.now().day}/{datetime.datetime.now().month}/{datetime.datetime.now().year}",
             'telefono':'32300009800',
@@ -110,7 +101,7 @@ class Firma_documentos():
             
             # creamos la carpeta de la persona
             # os.makedirs(f"{self.ruta_almacenamiento}\\{datos_a_diligenciar['nombre_completo']}", exist_ok=True)
-            documento_plantilla.save(f'{self.ruta_almacenamiento}\\{nombre_archivo}_{datos_a_diligenciar["nombre_completo"]}_{datos_a_diligenciar["cedula_ciudadania"]}.docx')
+            documento_plantilla.save(fr'{self.ruta_carpeta_persona}\{nombre_archivo}_{datos_a_diligenciar["nombre_completo"]}_{datos_a_diligenciar["cedula_ciudadania"]}.docx')
 
         print(ruta_carpeta_plantilla_administrativos)
 
@@ -128,19 +119,15 @@ class Firma_documentos():
             nombre_archivo = os.path.basename(ruta_formato)[:-5]
             documento_plantilla = DocxTemplate(ruta_formato)
             imagen_firma = InlineImage(documento_plantilla,ruta_firma, width=Mm(40))
-            print(nombre_archivo)
+            
             datos_a_diligenciar ={
-            'primer_nombre':'Juan',
-            'segundo_nombre':'Miguel',
-            'primer_apellido':'Ecele',
-            'segundo_apellido':'Gutierrez',
-            'nombre_completo': 'Juan Maicol ',
-            'direccion_residencia':'cl 777 # 888 9876',
-            'cedula_ciudadania':'0987654321',
-            'correo_electronico':'icfne@inc.com',
-            'cargo': 'Antibiotico',
-            'area': 'Administrativa',
-            'tipo_sangre':'AB+',
+            'nombre_completo': self.nombre_completo,
+            'direccion_residencia':self.direccion_residencia,
+            'cedula_ciudadania':self.cedula_ciudadania,
+            'correo_electronico':self.correo_electronico,
+            'cargo': self.cargo,
+            'area': self.area,
+            'tipo_sangre':self.tipo_sangre,
             'fecha_nacimiento':'1879/12/12',
             'fecha_actual':f"{datetime.datetime.now().day}/{datetime.datetime.now().month}/{datetime.datetime.now().year}",
             'telefono':'32300009800',

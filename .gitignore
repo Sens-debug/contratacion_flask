@@ -1,6 +1,8 @@
 # Flask
 venv 
 backend/archivos/*
+backend/firma_formatos/__pycache__
+
 
 #REACT
 # Logs
@@ -26,3 +28,4 @@ backend/archivos/*
 /frontend/react_app/*.njsproj
 /frontend/react_app/*.sln
 /frontend/react_app/*.sw?
+# /frontend/react_app/.env

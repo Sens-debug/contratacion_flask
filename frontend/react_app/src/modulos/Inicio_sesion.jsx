@@ -10,12 +10,14 @@ export function Formulario_login(){
     const [mensaje, setMensaje] = useState('');
     //Con este hook manejamos la navegacion por el sistema
     const navegacion = useNavigate();
+    const uri_flask = import.meta.env.VITE_URL_SERVIDOR
+
 
     //Creamos una funcion que nos haga el manejo de envio de datos desde ellogin hasta el backend
     const manejarEnvio =(variableControl) => {
         variableControl.preventDefault();
         //Hace un fetch a la url del backend
-        fetch('http://192.168.0.110:5000/inicio_sesion',{
+        fetch(uri_flask+'/inicio_sesion',{
             //Especifica el metodo del fetch 'post'
             method: 'POST',
             //Marca que se va a enviar un formato JSON
