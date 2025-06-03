@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 //Con el hook de la siguiente importacion podemos maneajr las redirecciones
 import { useNavigate } from "react-router-dom";
+import "../index.css"
 
 
 export function Formulario_login(){
@@ -42,37 +43,43 @@ export function Formulario_login(){
         });
     };
         return(
-            <div>
-                <h1>CONTRATACION</h1>
-                <h2>Iniciar Sesion</h2>
+            <div className=" bg-gray-700 justify-center min-h-screen flex items-center">
+                
+
+                <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md flex items-center">
+                
                 {/* Creamos la etiqueta Formulario donde crearemos toda la estructura del mismo */}
-                <form onSubmit={manejarEnvio}>
+                <form onSubmit={manejarEnvio}className="space-y-4 ">
                 {/* Div del usuario */}
                 <div>
                     {/* Creamos la etiqueta Usuario del formulario */}
-                    <label >Usuario:</label>
+                    <label className="block text-black font-medium" >Usuario:</label>
                     {/* Creamos un input y asiganos sus valores clave
                     -tipo-
                     -valor{muestra el valor actual contenido en la variable citada}
                     -onchange-{'actualiza el estado cuando el usuario escribe (on change)
                     -requerido : Especifica campo obligatorio} */}
                     <input type="text"
+                    className="mt-1 block rounded-md bg-gray-200 border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     value={usuario}
                     onChange={(e)=> setUsuario(e.target.value)} 
                     required/>
                 </div>
                 {/* DIV de la contraseña */}
                 <div>
-                    <label>Contraseña:</label>
+                    <label className="block text-black font-medium">Contraseña:</label>
                     <input type="password"
                         value={contraseña}
                         onChange={(e)=>setContraseña(e.target.value)}
-                        required 
+                        required
+                        className="mt-1 block rounded-md bg-gray-200 border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500" 
                     />
                 </div>
-                <button type="submit">Ingresar</button>
+                <button className="w-full bg-blue-700 text-white py-2 px-4 rounded-md hover:bg-blue-900 transition" type="submit">Ingresar</button>
+                <p className="text-m">{mensaje}</p>
                 </form>
-                <p>{mensaje}</p>
+                
+                </div>
             </div>
             
         )   

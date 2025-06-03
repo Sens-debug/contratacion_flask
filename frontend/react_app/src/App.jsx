@@ -1,7 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import {BrowserRouter as Router , Routes, Route} from 'react-router-dom'
-import './index.css'
+// import './index.css'
+// import '../src/index.css'
 
 import Panel_usuario from './modulos/Panel_usuario.jsx'
 import { Formulario_login } from './modulos/Inicio_sesion.jsx'

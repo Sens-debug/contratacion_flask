@@ -7,6 +7,7 @@ import magic
 import fitz  # Para PDF
 from PIL import Image
 import io
+import datetime
 
 def obtener_conexion_bd():
     return mysql.connector.connect(
@@ -26,10 +27,11 @@ def verificar_inicio_sesion():
     try:
         conexion = obtener_conexion_bd()
         datos = request.json
+        print(datos)
         usuario= datos.get("usuario")
         contraseña= datos.get("contraseña")
         cursor = conexion.cursor(buffered=True)
-        cursor.execute(f"""select 
+        cursor.execute("""select 
                         upper(CONCAT_WS('_',usuarios.primer_nombre,usuarios.segundo_nombre,usuarios.primer_apellido,usuarios.segundo_apellido)) as nombre_completo,
                         usuarios.direccion_residencia as direccion,
                         usuarios.cedula_ciudadania as cedula,
@@ -48,6 +50,10 @@ def verificar_inicio_sesion():
                         INNER JOIN areas on areas.id= cargosxarea.area_id
                        where usuarios.nombre_usuario = %s and usuarios.contraseña_usuario=%s""",(usuario,contraseña,))
         res=cursor.fetchone()
+        cursor.close()
+        conexion.close()
+        print(res)
+
         
         if res:
             nombre_completo=res[0]
@@ -76,10 +82,60 @@ def verificar_inicio_sesion():
                             }
                             ),200
         else:
-            return jsonify({"estado":"denegado"}),200
+            return jsonify({"estado":"denegado"}),400
     finally:
+        pass
+
+@app.route('/crear_usuario', methods=['POST'])
+def crear_usuario():
+    informacion =request.json
+    primer_nombre = informacion.get("Primer_nombre")
+    segundo_nombre = informacion.get("Segundo_nombre")
+    primer_apellido = informacion.get("Primer_apellido")
+    segundo_apellido = informacion.get("Segundo_apellido")
+    direccion = informacion.get("Direccion_Residencia")
+    cedula = informacion.get("Cedula_ciudadania")
+    correo = informacion.get("Correo_electronico")
+    telefono = informacion.get("Telefono")
+    Nombre_usuario = informacion.get("Nombre_Usuario")
+    Contraseña_usuario = informacion.get("Contraseña_usuario")
+    cargo_seleccionado_id = informacion.get("cargo_seleccionado") 
+    tipo_sangre_seleccionado_id = informacion.get("tipo_sangre_seleccionado") 
+    dia_nacimiento = informacion.get("fecha_nacimiento")["day"]
+    mes_nacimiento = informacion.get("fecha_nacimiento")["month"]
+    año_nacimiento = informacion.get("fecha_nacimiento")["year"]
+    fecha_nacimiento = datetime.date(año_nacimiento,mes_nacimiento,dia_nacimiento)
+    print(Contraseña_usuario)
+
+    
+
+    try:
+        conexion = obtener_conexion_bd()
+        cursor = conexion.cursor()
+        cursor.execute("""INSERT INTO usuarios
+                       (id,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,
+                        direccion_residencia,cedula_ciudadania,correo_electronico,
+                        cargo_id,tipo_sangre_id,telefono,ruta_firma,nombre_usuario,contraseña_usuario,fecha_nacimiento,estado_firma) 
+                        VALUES
+                        (%s,%s,%s,%s,%s,
+                            %s,%s,%s,
+                            %s,%s,%s,%s,
+                            %s,%s,%s,%s);""",(None,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,
+                                         direccion,cedula,correo,
+                                         cargo_seleccionado_id,tipo_sangre_seleccionado_id,telefono,None,
+                                         Nombre_usuario,Contraseña_usuario,fecha_nacimiento,0 ))
+        conexion.commit()
+        cursor.execute("select id from usuarios where cedula_ciudadania =%s",(cedula,))
+        id_usuario = cursor.fetchone()
+        print(id_usuario[0])
+        cursor.execute("""INSERT INTO usuariosxestado (id_usuario,estado_id) VALUES (%s,%s)""",(id_usuario[0],1))
+        conexion.commit()
         cursor.close()
         conexion.close()
+        return jsonify({"mensaje":"Creacion de usuario Exitosa"}),200
+    except Exception as e:
+        print(e)
+        return jsonify ({"mensaje":f"Error en la creacion de usuario{e}"}),400
 
 
 @app.route('/obtener_cantidad_archivos',methods=['POST'])
@@ -102,16 +158,15 @@ def obtener_cantidad_archivos_a_subir():
         ON dce.cargo_id = u.cargo_id AND dce.estado_id = ue.estado_id
     -- Relación con los nombres de documentos
     INNER JOIN documentos d ON d.id = dce.documento_id
- = %s; """,(id_usuario,))
+                   where u.id= %s; """,(id_usuario,))
     respuesta =cursor.fetchall()
-    # print(respuesta)
+    print(respuesta)
     cursor.close()
     conexion.close()
     if respuesta:
         
         cantidad_elementos= len(respuesta)
         print(cantidad_elementos)
-        elementos_array =np.array(respuesta)
         return jsonify({"respuesta":respuesta,
                         "cantidad_elementos":cantidad_elementos}),200
     else: 
@@ -169,24 +224,17 @@ def upload_file():
     telefono = request.form.get('tel')
     cargo_id = request.form.get('cargo_id')
     
-    # print(f"id buscado {id_usuario}")
-
-
-    # if not request.files:
-    #     return jsonify({"mensaje": "No se enviaron archivos."}), 400
+    if not request.files:
+        return jsonify({"mensaje": "No se enviaron archivos."}), 400
     archivos = request.files
+
     
     errores = []
     print(archivos)
-    
 
     for nombre_archivo, archivo in archivos.items():
         contenido = archivo.read()
         print(nombre_archivo)
-
-        # if not contenido:
-        #     errores.append(f"{nombre_archivo}: archivo vacío.")
-        #     continue
 
         tipo_archivo =comprobar_tipo_archivos(nombre_archivo,contenido,errores)
         if tipo_archivo == 'image/jpeg' or tipo_archivo=='image/png':
@@ -199,36 +247,81 @@ def upload_file():
         ruta_carpeta_archivos = os.path.join(ruta_carpeta_script,"archivos")
         
         os.makedirs(fr"{ruta_carpeta_archivos}\{area}\{cargo}\{nombre_completo}", exist_ok=True)
-        ruta_carpeta_persona  = os.path.join(ruta_carpeta_archivos,area,cargo,nombre_completo)
+        ruta_carpeta_persona  = os.path.abspath(os.path.join(ruta_carpeta_archivos,area,cargo,nombre_completo))
         print(ruta_carpeta_persona)
-        
+        ruta_archivo_bucle= fr"{ruta_carpeta_persona}\{nombre_archivo}_{nombre_completo}.{tipo_archivo}" 
+
         try:
-            with open(fr"{ruta_carpeta_persona}\{nombre_archivo}_{nombre_completo}.{tipo_archivo}" ,"wb") as f:
-                
+            with open(ruta_archivo_bucle ,"wb") as f:
                 f.write(contenido)
 
         except Exception as e:
             errores.append({"no cargó el archivo":e})
+
         if nombre_archivo == 'Firma':
-            conexion = obtener_conexion_bd().cursor()
-            conexion.execute('update usuarios set ruta_firma =%s where usuarios.id ')
-            pass
+            ruta_firma =  ruta_archivo_bucle
+            #uso un replace pq mysql me elimina los '\' y los '\b' se mos cambia por un <?>
+            ruta_firma_para_almacenaje= ruta_firma.replace('\\','-')
+            conexion = obtener_conexion_bd()
+            cursor = conexion.cursor()
+            cursor.execute('update usuarios set ruta_firma =%s where usuarios.id=%s ',(ruta_firma_para_almacenaje,id_usuario,))
+            conexion.commit()
+            cursor.close()
+            conexion.close()
+            
+    conexion = obtener_conexion_bd()
+    cursor= conexion.cursor()
+    cursor.execute("select estado_id from usuariosxestado WHERE usuariosxestado.id_usuario=%s",(id_usuario,))
+    res = cursor.fetchone()
+    cursor.close()
+    conexion.close()
+    
+    if res[0] == 2:
+        from firma_fomatos.firma_documentos import Firma_documentos
+        firma =Firma_documentos(nombre_completo,direccion,cedula,correo_electronico,telefono,area,cargo,tipo_sangre,fecha_nacimiento, ruta_carpeta_persona=ruta_carpeta_persona)
+        conexion = obtener_conexion_bd()
+        cursor = conexion.cursor()
+        cursor.execute('select ruta_firma from usuarios where id=%s',(id_usuario,))
+        res = cursor.fetchone()
+        cursor.close()
+        conexion.close()
+        
+        if res[0] == None:
+            return jsonify({"mensaje":"La firma es de caracter oblogatorio"}),400
+        conexion = obtener_conexion_bd()
+        cursor=conexion.cursor()
+        cursor.execute("select estado_firma from usuarios where id=%s",(id_usuario,))
+        res = cursor.fetchone()
+        print(res)
+        cursor.close()
+        conexion.close()
         
 
-        from firma_fomatos.firma_documentos import Firma_documentos
-        firma =Firma_documentos(nombre_completo,direccion,cedula,correo_electronico,telefono,area,cargo,tipo_sangre,fecha_nacimiento, ruta_carpeta_persona)
+        #si no ah firmado
+        if res[0] == 0 or res[0]== None:
+            print("entro al estado firma")
+            print(type(cargo_id))
+            if cargo_id == '1':
+                firma.firmar_formatos_antibiotico()
+            conexion = obtener_conexion_bd()
+            cursor = conexion.cursor()
+            cursor.execute("update usuarios set estado_firma=1 where id =%s", (id_usuario,))
+            conexion.commit()
+            cursor.close()
+            conexion.close()
+            
+
+     #Firma de los formatos posterior a subir la firma
     if errores:
-        if cargo_id =='1':
-            firma.firmar_formatos_antibiotico()
+       
         # elif cargo ==2
 
         return jsonify({
             "mensaje": f"Algunos archivos no se subieron.{errores}"
         }), 400
-    if cargo_id =='1':
-        firma.firmar_formatos_antibiotico()
     
-    # Firma de los formatos posterior a subir la firma
+    
+    
 
     return jsonify({"mensaje": "Archivos subidos correctamente."}), 200
 
@@ -244,7 +337,8 @@ def obtener_campos_crear_usuarios():
     retorno = {}
     for columna in columnas_base_datos:
         retorno[str(columna[0])]=columna[0]
+        print(columna)
     return jsonify({'retorno':retorno})
 
 if __name__ == '__main__':  
-    app.run(debug=True,  host= '0.0.0.0' ,port=5000)
+    app.run(debug=True,  host= '0.0.0.0' ,port=5009)
