@@ -6,7 +6,7 @@ import {Button} from "@heroui/button"
 import {Input} from "@heroui/input"
 import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DateInputField} from "@heroui/react";
 import {DateInput} from "@heroui/react";
-import {CalendarDate, parseDate} from "@internationalized/date";
+
 
 
 
@@ -20,16 +20,40 @@ function Panel_usuario(){
     const navegacion = useNavigate();
     const uri_flask = import.meta.env.VITE_URL_SERVIDOR
     const [documentos_necesarios, set_documentos_necesarios]= useState([])
-    const [cargos_a_elegir, set_cargos_a_elegir] = React.useState(["Cargo"]);
-    const cargo_seleccionado = React.useMemo(
-    () => Array.from(cargos_a_elegir).join(", ").replaceAll("_", " "),
-    [cargos_a_elegir],);
-     const [tipos_sangre_a_elegir, set_tipos_sangre_a_elegir] = React.useState(["Tipo Sangre"]);
-    const tipo_sangre_seleccionado = React.useMemo(
-    () => Array.from(tipos_sangre_a_elegir).join(", ").replaceAll("_", " "),
-    [tipos_sangre_a_elegir],);
-    const [fecha_nacimiento, set_fecha_nacimiento] = useState()
+    const [usuarios_en_sistema, set_usuarios_en_sistema] = useState([])
+    const [estados_contratacion, set_estados_contratacion] = useState([])
 
+      const [estados_a_seleccionar, set_estados_a_seleccionar] = React.useState(["Seleccione estado Contratacion"]);
+      const estado_seleccionado = React.useMemo(
+      () => Array.from(estados_a_seleccionar).join(", ").replace(/_/g, ""),
+      [estados_a_seleccionar],
+      );
+
+      const [usuarios_a_seleccionar, set_usuario_a_seleccionar] = React.useState(["Seleccione Usuario"]);
+      const usuario_seleccionado = React.useMemo(
+      () => Array.from(usuarios_a_seleccionar).join(", ").replace(/_/g, ""),
+      [usuarios_a_seleccionar],
+      );
+
+      const [cargos_a_elegir, set_cargos_a_elegir] = React.useState(["Cargo"]);
+      const cargo_seleccionado = React.useMemo(
+      () => Array.from(cargos_a_elegir).join(", ").replaceAll("_", " "),
+      [cargos_a_elegir],);
+
+      const [tipos_sangre_a_elegir, set_tipos_sangre_a_elegir] = React.useState(["Tipo Sangre"]);
+      const tipo_sangre_seleccionado = React.useMemo(
+      () => Array.from(tipos_sangre_a_elegir).join(", ").replaceAll("_", " "),
+      [tipos_sangre_a_elegir],);
+
+      const [estado_firma_a_elegir, set_estado_firma_a_elegir] = React.useState(["Estado Firma"]);
+      const estado_firma_seleccionado = React.useMemo(
+      () => Array.from(estado_firma_a_elegir).join(", ").replaceAll("_", " "),
+      [estado_firma_a_elegir],);
+      const [mensaje_back, set_mensaje_back] = useState("")
+
+      const [fecha_nacimiento, set_fecha_nacimiento] = useState()
+
+    
 
     useEffect(()=>{
         if(datos_recibidos_login.cargo_id!=4){
@@ -40,14 +64,23 @@ function Panel_usuario(){
         })
         .then(respuesta => respuesta.json())
         .then(data=> {set_documentos_necesarios(data.respuesta||[])})
-    }
+      }
+        if(datos_recibidos_login.cargo_id==4){
+        fetch(uri_flask+'/obtener_usuarios')
+        .then( response => response.json())
+        .then(data => set_usuarios_en_sistema(data.usuarios))
+        .catch(error=> console.log("error"+error))
+        
+        fetch(uri_flask+'/obtener_estados_contratacion')
+        .then(response=> response.json())
+        .then(data => set_estados_contratacion(data.estados))
+        .catch(error=> console.log("error"+error))
+
+        }
     },[]);
         console.log(documentos_necesarios)
-
-
-    
-    
-    
+        console.log(usuarios_en_sistema)
+        console.log(estados_contratacion)
 
     function cerrar_sesion(){
         navegacion("/")
@@ -81,14 +114,61 @@ function Panel_usuario(){
                        console.log("Respuesta del servidor:", data);
                      })
                      .catch(error => console.error("Error al enviar:", error));
+                     window.location.reload()
                                
     }
 
     if(datos_recibidos_login.cargo_id==4){
+      
+    
+      function actualizar_estado_contratacion(e){
+        e.preventDefault();
+        if(estado_seleccionado == "Seleccione estado Contratacion" || usuario_seleccionado == "Seleccione Usuario"){
+        alert("Debe rellenar todos los campos del formulario");
+        return;}
         
+        const datos = Object.fromEntries(new FormData(e.currentTarget));
+        datos["id_usuario"]= usuario_seleccionado
+        datos["id_estado"] = estado_seleccionado
+        console.log("datos a enviar",datos);
+
+        fetch(uri_flask+"/actualizar_estadoxusuario",{
+          method: 'POST',
+          headers:{
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(datos)
+        })
+        .then(res => res.json())
+        .then(data => set_mensaje_back(data.mensaje))
+        .catch(error => console.log("error"+error));
+        }
+        
+      function actualizar_estado_firma(e){
+        e.preventDefault()
+        if(estado_firma_seleccionado == "Estado Firma" || usuario_seleccionado == "Seleccione Usuario"){
+            alert("Rellene los datos de su formulario")
+            return
+        }
+        const datos = Object.fromEntries(new FormData(e.currentTarget));
+        datos["estado_firma"] = estado_firma_seleccionado
+        datos["id_usuario"] = usuario_seleccionado
+        
+        fetch(uri_flask+"/actualizar_estado_firma",{
+          method: 'POST',
+          headers:{
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(datos)
+        })
+        .then(res => res.json())
+        .then(data => set_mensaje_back(data.mensaje))
+        .catch(error => console.log("error"+error));
+        }
+      
         return (
             <div className="bg-gray-500 w-full  h-full flex flex-row  ">
-                <button onClick={cerrar_sesion}>Cerrar Sesion</button>
+              
             <Form
             className="w-1/2 max-w-xs  h-full flex flex-col gap-4 bg-white"
             onSubmit={envio_creacion_usuario}>
@@ -167,10 +247,10 @@ function Panel_usuario(){
                   {cargo_seleccionado}
                 </Button>
               </DropdownTrigger>
-              <DropdownMenu className="bg-black  text-white"
+              <DropdownMenu className="bg-gray-800  text-white border-2 border-black"
                 disallowEmptySelection
                 aria-label="Multiple selection example"
-                closeOnSelect={false}
+                closeOnSelect={true}
                 selectedKeys={cargos_a_elegir}
                 selectionMode="single"
                 variant="flat"
@@ -189,10 +269,10 @@ function Panel_usuario(){
                   {tipo_sangre_seleccionado}
                 </Button>
               </DropdownTrigger>
-              <DropdownMenu className="bg-black  text-white"
+              <DropdownMenu className="bg-gray-900  border-2 border-black text-white"
                 disallowEmptySelection
                 aria-label="Multiple selection example"
-                closeOnSelect={false}
+                closeOnSelect={true}
                 selectedKeys={tipos_sangre_a_elegir}
                 selectionMode="single"
                 variant="flat"
@@ -254,20 +334,166 @@ function Panel_usuario(){
             type="submit">
                 Crear
             </Button>
+            
+            </div>
+             <p className="bg-gray-300 font-medium text-center">{mensaje_back}</p>
+
+            </Form>
+
+            <div className="px-10 "></div>
+
+            <div className="w-1/2 max-w-m flex flex-col rounded-sm">
+                <div className=" w-1/2 max-w-xs border-2 border-black " >
+                      {/* Actualizar Estado Contratacion */}
+                      <Form className="bg-white w-full max-w-xs flex flex-col px-4"
+                      onSubmit={actualizar_estado_contratacion}
+                      >      
+                      <h1 className="bg-gray-300 w-full text-center font-medium">Actualizar Estado Contratacion</h1>
+
+                      {/* Seleccionar ID usuario */}
+                      <Dropdown>
+                          <DropdownTrigger>
+                            <Button className="capitalize rounded-xl border-2 border-black  bg-blue-500 hover:bg-blue-900 transition py-4" variant="bordered">
+                              {usuario_seleccionado}
+                            </Button>
+                          </DropdownTrigger>
+                          <DropdownMenu
+                            className=" border-2 border-black"
+                            disallowEmptySelection
+                            aria-label="Single selection example"
+                            selectedKeys={usuarios_a_seleccionar}
+                            selectionMode="single"
+                            variant="flat"
+                            onSelectionChange={set_usuario_a_seleccionar}
+                          >
+                            {usuarios_en_sistema.map((item)=> (
+                            <DropdownItem className="w-full bg-black text-white border-2 border-white"
+                            key={item[0]}>{item[1]}-{item[2]}_{item[3]}</DropdownItem>
+                            
+                            
+                            ))}
+
+                          </DropdownMenu>
+                      </Dropdown>
+                          
+                      {/* Seleccionar estado de contratacion */}
+                      <Dropdown>
+                          <DropdownTrigger>
+                            <Button className="capitalize rounded-xl border-2 border-black  bg-blue-500 hover:bg-blue-900 transition py-4" variant="bordered">
+                              {estado_seleccionado}
+                            </Button>
+                          </DropdownTrigger>
+                          <DropdownMenu
+                            className=" border-2 border-black"
+                            disallowEmptySelection
+                            aria-label="Single selection example"
+                            selectedKeys={estados_a_seleccionar}
+                            selectionMode="single"
+                            variant="flat"
+                            onSelectionChange={set_estados_a_seleccionar}
+                          >
+                            {estados_contratacion.map((item)=> (
+                            <DropdownItem className="w-full bg-black text-white border-2 border-white"
+                            key={item[0]}>{item[1]}</DropdownItem>
+                            
+                            
+                            ))}
+
+                          </DropdownMenu>
+                      </Dropdown>
+                          
+                      <div  className="flex gap-2 border-2  text-white bg-blue-400 rounded-md hover:bg-blue-900 transition
+                      py-2  px-2">
+                          <Button
+                          className="w-full text-center"
+                          type="submit">
+                              Actualizar
+                          </Button>
+                      </div>
+                       <p className="bg-gray-300 font-medium text-center">{mensaje_back}</p>
+                          
+                      </Form>
+                </div>
+                              
+            <div className="w-1/2 max-w-xs border-2 border-black ">
+
+            {/* Actualizar Estado Firma */}
+            <Form
+            onSubmit={actualizar_estado_firma}
+            className="bg-white w-full max-w-xs flex flex-col px-4 py-2"
+            >
+              <h1 className="w-full bg-gray-300 font-medium text-center">Establecer Estado de la Firma</h1>
+               <Dropdown>
+                <DropdownTrigger>
+                  <Button className="capitalize rounded-xl border-2 border-black  bg-blue-500 hover:bg-blue-900 transition py-4" variant="bordered">
+                    {usuario_seleccionado}
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  className=" border-2 border-black"
+                  disallowEmptySelection
+                  aria-label="Single selection example"
+                  selectedKeys={usuarios_a_seleccionar}
+                  selectionMode="single"
+                  variant="flat"
+                  onSelectionChange={set_usuario_a_seleccionar}
+                >
+                  {usuarios_en_sistema.map((item)=> (
+                  <DropdownItem className="w-full bg-black text-white border-2 border-white"
+                  key={item[0]}>{item[1]}-{item[2]}_{item[3]}</DropdownItem>
+
+
+                  ))}
+                  
+                </DropdownMenu>
+            </Dropdown>
+
+              {/* Estado Firma */}
+              <Dropdown>
+                <DropdownTrigger>
+                  <Button className="capitalize rounded-xl border-2 border-black  bg-blue-500 hover:bg-blue-900 transition py-4" variant="bordered">
+                    {estado_firma_seleccionado}
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  className=" border-2 border-black"
+                  disallowEmptySelection
+                  aria-label="Single selection example"
+                  selectedKeys={estado_firma_a_elegir}
+                  selectionMode="single"
+                  variant="flat"
+                  onSelectionChange={set_estado_firma_a_elegir}
+                >
+                  
+                  <DropdownItem className="w-full bg-black text-white border-2 border-white"
+                  key='0'>Disponible para Firma</DropdownItem>
+
+                  <DropdownItem className="w-full bg-black text-white border-2 border-white"
+                  key='1'>No Disponible para Firma</DropdownItem>                  
+                  
+                </DropdownMenu>
+            </Dropdown>
+              
+            <div className="flex gap-2 border-2  text-white bg-blue-400 rounded-md hover:bg-blue-900 transition
+            py-2  px-2">
+                <Button
+                className="w-full text-center"
+                type="submit">
+                    Actualizar
+                </Button>
+            </div>
+            <p className="bg-gray-300 font-medium text-center">{mensaje_back}</p>
+
+            </Form>
+            </div>
 
             </div>
-            </Form>
-            <h1 className="text-white col px-9">jkdgkhdghk</h1>
-
 
             </div>
         )
     }
     
     
-
-
-
     const manejar_cambio_archivo =(v_control_cambio,nombre_documento)=>{
         const archivo_seleccionado =(v_control_cambio.target.files[0])
         setArchivo(prev => ({...prev,[nombre_documento]:archivo_seleccionado}));

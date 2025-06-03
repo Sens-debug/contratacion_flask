@@ -32,7 +32,7 @@ def verificar_inicio_sesion():
         contraseña= datos.get("contraseña")
         cursor = conexion.cursor(buffered=True)
         cursor.execute("""select 
-                        upper(CONCAT_WS('_',usuarios.primer_nombre,usuarios.segundo_nombre,usuarios.primer_apellido,usuarios.segundo_apellido)) as nombre_completo,
+                        upper(CONCAT_WS(' ',usuarios.primer_nombre,usuarios.segundo_nombre,usuarios.primer_apellido,usuarios.segundo_apellido)) as nombre_completo,
                         usuarios.direccion_residencia as direccion,
                         usuarios.cedula_ciudadania as cedula,
                         usuarios.correo_electronico as correo,
@@ -89,6 +89,7 @@ def verificar_inicio_sesion():
 @app.route('/crear_usuario', methods=['POST'])
 def crear_usuario():
     informacion =request.json
+    print(informacion)
     primer_nombre = informacion.get("Primer_nombre")
     segundo_nombre = informacion.get("Segundo_nombre")
     primer_apellido = informacion.get("Primer_apellido")
@@ -137,6 +138,67 @@ def crear_usuario():
         print(e)
         return jsonify ({"mensaje":f"Error en la creacion de usuario{e}"}),400
 
+@app.route('/obtener_usuarios', methods= ['GET'])
+def obtener_id_nombre_usuarios():
+    try:
+        print("holo")
+        conexion = obtener_conexion_bd()
+        cursor =conexion.cursor()
+        cursor.execute("select id, primer_nombre, primer_apellido, cedula_ciudadania from usuarios")
+        res=cursor.fetchall()
+        print(res)
+        return jsonify({"mensaje":"Fetch Exitoso"
+                        ,"usuarios":res}),200
+    except Exception as e:
+        return jsonify({"mensaje":f"Error en el metodo{e}"}),400
+
+@app.route('/obtener_estados_contratacion', methods=['GET'])
+def obtener_estados_contratacion():
+    try:
+        conexion = obtener_conexion_bd()
+        cursor = conexion.cursor()
+        cursor.execute("select id, estado from estados")
+        res = cursor.fetchall()
+        return jsonify({"estados":res,
+                        "mensaje":"fetch exitoso"}),200
+    except Exception as e:
+        return jsonify({"mensaje":f"Error en el fetch{e}"}),400
+
+@app.route('/actualizar_estadoxusuario',methods=['POST'])
+def actualizar_estadoxusuario():
+    try:
+        data = request.json
+        id_usuario = data["id_usuario"]
+        id_estado = data["id_estado"]
+        conexion = obtener_conexion_bd()
+        cursor = conexion.cursor()
+        cursor.execute("""update usuariosxestado 
+                       set usuariosxestado.estado_id=%s 
+                       WHERE usuariosxestado.id_usuario=%s""", (id_estado,id_usuario))
+        conexion.commit()
+        cursor.close()
+        conexion.close()
+        return jsonify({"mensaje":"Datos_actualizados exitosamente"}),200
+    except Exception as e:
+        return jsonify({"mensaje":f"error en el post{e}"}),400
+
+@app.route('/actualizar_estado_firma', methods=['POST'])
+def actualizar_estado_firma():
+    try:
+        data = request.json
+        id_estado_firma = data.get("estado_firma")
+        id_usuario = data.get("id_usuario")
+        conexion = obtener_conexion_bd()
+        cursor = conexion.cursor()
+        cursor.execute("""update usuarios
+                        set usuarios.estado_firma=%s 
+                       WHERE usuarios.id=%s""",(id_estado_firma,id_usuario))
+        conexion.commit()
+        cursor.close()
+        conexion.close()
+        return jsonify({"mensaje":"Actualizacion Exitosa"}),200
+    except Exception as e: 
+        return jsonify({"mensaje":f"Error en la actualizacion {e}"})
 
 @app.route('/obtener_cantidad_archivos',methods=['POST'])
 def obtener_cantidad_archivos_a_subir():
@@ -171,7 +233,6 @@ def obtener_cantidad_archivos_a_subir():
                         "cantidad_elementos":cantidad_elementos}),200
     else: 
         return jsonify({"respuesta":"imposible continuar"},400)
-
 
 def comprobar_tipo_archivos (nombre_archivo,contenido_archivo, errores):
     mime = magic.Magic(mime=True)  # Usa instancia segura
@@ -212,6 +273,10 @@ def comprobar_tipo_archivos (nombre_archivo,contenido_archivo, errores):
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    if not request.files:
+        return jsonify({"mensaje": "No se enviaron archivos."}), 400
+    archivos = request.files
+    print(request.form)
     nombre_completo = request.form.get('nombre_completo')
     id_usuario = request.form.get('id_usuario')
     direccion = request.form.get('direccion')
@@ -223,10 +288,6 @@ def upload_file():
     fecha_nacimiento = request.form.get('f_nacimiento')
     telefono = request.form.get('tel')
     cargo_id = request.form.get('cargo_id')
-    
-    if not request.files:
-        return jsonify({"mensaje": "No se enviaron archivos."}), 400
-    archivos = request.files
 
     
     errores = []
@@ -258,6 +319,9 @@ def upload_file():
         except Exception as e:
             errores.append({"no cargó el archivo":e})
 
+        if nombre_archivo == 'Firma' and tipo_archivo == 'pdf':
+            return jsonify({"mensaje":"La firma no puede ser formatyo PDF, DEBE SER IMAGEN"})
+
         if nombre_archivo == 'Firma':
             ruta_firma =  ruta_archivo_bucle
             #uso un replace pq mysql me elimina los '\' y los '\b' se mos cambia por un <?>
@@ -278,7 +342,7 @@ def upload_file():
     
     if res[0] == 2:
         from firma_fomatos.firma_documentos import Firma_documentos
-        firma =Firma_documentos(nombre_completo,direccion,cedula,correo_electronico,telefono,area,cargo,tipo_sangre,fecha_nacimiento, ruta_carpeta_persona=ruta_carpeta_persona)
+        firma =Firma_documentos(nombre_completo,direccion,cedula,correo_electronico,telefono,area,cargo,tipo_sangre,fecha_nacimiento, ruta_carpeta_persona, ruta_firma)
         conexion = obtener_conexion_bd()
         cursor = conexion.cursor()
         cursor.execute('select ruta_firma from usuarios where id=%s',(id_usuario,))

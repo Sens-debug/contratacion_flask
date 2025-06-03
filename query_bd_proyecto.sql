@@ -98,7 +98,7 @@ INSERT INTO documentosxcargoxestado (cargo_id,documento_id,estado_id) VALUES
 
 INSERT INTO usuarios(id,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,direccion_residencia,cedula_ciudadania,
 correo_electronico,cargo_id,tipo_sangre_id,telefono,ruta_firma,nombre_usuario,contraseña_usuario,fecha_nacimiento,estado_firma) 
-VALUES (NULL, 'Juan', 'Miguel', ' XD','XD','XXX#XXX/XX','287449','ips@ipstid.com',1,1,'telefono_imaginario',NULL,'JM','1',NULL,0);
+VALUES (NULL, 'Fabian', NULL, 'Marquez', 'TID', 'cl 88 # 99-33', '5558796', 'ipstid@ipstid.com', '4', '2', '35500088', NULL, 'Fabi', '0', NULL, NULL);
 
-INSERT INTO usuariosxestado (id_usuario,estado_id) VALUES (1,1)
+
 

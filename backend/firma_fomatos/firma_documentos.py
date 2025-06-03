@@ -3,42 +3,11 @@ from docx.shared import Mm #manejar las unidades de tamaño
 import datetime
 import os
 
-# doc = DocxTemplate(r"C:\Users\Sistemas\Desktop\try_contratacion\backend\firma_fomatos\plantilla_prueba.docx")
-
-# ruta_imagen = r"C:\Users\Sistemas\Desktop\try_contratacion\backend\firma_fomatos\firma_prueba.jpg"
-ruta_imagen = fr"{os.path.join(os.path.dirname(__file__),'firma_prueba.jpg')}"
-
-
-
-
-
-ruta_carpeta_plantilla_cuidadores = None
-ruta_carpeta_plantilla_permanentes = None
-
-
-# imagen = InlineImage(doc,ruta_imagen, width=Mm(40))
-fecha = datetime.datetime.now()
-dia = fecha.day
-mes = fecha.month
-año = fecha.year
-strign_fecha = f'{dia}/{mes}/{año}'
-variables = {'fecha':strign_fecha,
-             'nombre':'Diana Urueña',
-             'cedula':'0000018451',
-             'cargo':'Gerente General',
-            #  'firma' : imagen
-             }
-# print(variables)
-
-# doc.render(variables)
-# doc.save(r'C:\Users\Sistemas\Desktop\try_contratacion\backend\firma_fomatos\prueba.docx')
-
-
 class Firma_documentos():
     def __init__(self,
                  nombre_completo,direccion_residencia,cedula_ciudadania,
-                 correo_electronico,telefono,area,cargo,tipo_sangre,fecha_nacimiento, ruta_carpeta_persona
-                 ):
+                 correo_electronico,telefono,area,cargo,tipo_sangre,fecha_nacimiento, ruta_carpeta_persona,
+                 ruta_firma):
         self.ruta_carpeta_persona = ruta_carpeta_persona
         self.datos_a_diligenciar ={
         'nombre_completo': nombre_completo,
@@ -48,15 +17,15 @@ class Firma_documentos():
         'cargo': cargo,
         'area': area,
         'tipo_sangre':tipo_sangre,
-        'fecha_nacimiento':'1879/12/12',
+        'fecha_nacimiento':fecha_nacimiento,
         'fecha_actual':f"{datetime.datetime.now().day}/{datetime.datetime.now().month}/{datetime.datetime.now().year}",
-        'telefono':'32300009800',
+        'telefono':telefono,
         'fecha_dia':datetime.datetime.now().day,
         'fecha_mes':datetime.datetime.now().month,
         'fecha_año':datetime.datetime.now().year,
         'firma': None
         }
-
+        self.ruta_firma = os.path.abspath(ruta_firma)
         #obtiene la ruta del script, el cual debe compartir carpeta con la carpeta contenedora de los formatos
         ruta_script=__file__
         self.ruta_carpetas_plantillas = os.path.join(os.path.dirname(ruta_script),'Plantillas')
@@ -112,7 +81,8 @@ class Firma_documentos():
             ruta_formato = os.path.join(ruta_carpeta_plantilla_antibioticos,i)
             nombre_archivo = os.path.basename(ruta_formato)[:-5]
             documento_plantilla = DocxTemplate(ruta_formato)
-            imagen_firma = InlineImage(documento_plantilla,ruta_firma, width=Mm(40))
+            imagen_firma = InlineImage(documento_plantilla,self.ruta_firma, width=Mm(40), height=Mm(30))
+            print(self.ruta_firma)
             self.datos_a_diligenciar["firma"] = imagen_firma
             documento_plantilla.render(self.datos_a_diligenciar)
             # os.makedirs(f"{self.ruta_carpetas_plantillas}\\Formatos_Firmados\\Antibiotico\\{self.datos_a_diligenciar['nombre_completo']}", exist_ok=True)
