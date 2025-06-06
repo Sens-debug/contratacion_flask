@@ -9,6 +9,8 @@ class Firma_documentos():
                  correo_electronico,telefono,area,cargo,tipo_sangre,fecha_nacimiento, ruta_carpeta_persona,
                  ruta_firma):
         self.ruta_carpeta_persona = ruta_carpeta_persona
+        fecha_actual = datetime.datetime.now()
+        fechas =[fecha_actual.day,fecha_actual.month,fecha_actual.year]
         self.datos_a_diligenciar ={
         'nombre_completo': nombre_completo,
         'direccion_residencia':direccion_residencia,
@@ -20,9 +22,10 @@ class Firma_documentos():
         'fecha_nacimiento':fecha_nacimiento,
         'fecha_actual':f"{datetime.datetime.now().day}/{datetime.datetime.now().month}/{datetime.datetime.now().year}",
         'telefono':telefono,
-        'fecha_dia':datetime.datetime.now().day,
-        'fecha_mes':datetime.datetime.now().month,
-        'fecha_año':datetime.datetime.now().year,
+        'fecha_dia':fechas[0],
+        'fecha_mes':fechas[1],
+        'fecha_año':fechas[2],
+        'fecha_final_contrato':datetime.timedelta(days=365)+datetime.datetime(fechas[2],fechas[1],fechas[0]),
         'firma': None
         }
         self.ruta_firma = os.path.abspath(ruta_firma)
@@ -31,41 +34,37 @@ class Firma_documentos():
         self.ruta_carpetas_plantillas = os.path.join(os.path.dirname(ruta_script),'Plantillas')
 
     def firmar_formatos_administrativo(self):
-    #     # ruta_firma = r"C:\Users\Sistemas\Desktop\try_contratacion\backend\firma_fomatos\firma_prueba.jpg"
-    #     ruta_carpeta_plantilla_administrativos=os.path.join(self.ruta_carpetas_plantillas,"Plantillas_administrativo")
+        ruta_carpeta_plantilla_administrativos=os.path.join(self.ruta_carpetas_plantillas,"Plantillas_administrativo")
 
 
-    #     #LLena el array con el contenido de la carpeta en la ruta absoluta asignada, siempre y cuando sea un archivo finalizado en .docx
-    #     #Sintaxis contiene salto de linea
-    #     archivos_administrativos = [i for i in os.listdir(ruta_carpeta_plantilla_administrativos) 
-    #                                 if os.path.isfile(os.path.join(ruta_carpeta_plantilla_administrativos,i)) 
-    #                                 and i.endswith('.docx')]
-    #     listado_formatos = []
-    #     for i in archivos_administrativos:
-    #         ruta_formato = os.path.join(ruta_carpeta_plantilla_administrativos,i)
-    #         # Aplicamos string slicing para eliminar los ultimos 5 caracteres(.docx)
-    #         nombre_archivo = os.path.basename(ruta_formato)[:-5]
+        #LLena el array con el contenido de la carpeta en la ruta absoluta asignada, siempre y cuando sea un archivo finalizado en .docx
+        #Sintaxis contiene salto de linea
+        archivos_administrativos = [i for i in os.listdir(ruta_carpeta_plantilla_administrativos) 
+                                    if os.path.isfile(os.path.join(ruta_carpeta_plantilla_administrativos,i)) 
+                                    and i.endswith('.docx')]
+        for i in archivos_administrativos:
+            ruta_formato = os.path.join(ruta_carpeta_plantilla_administrativos,i)
+            # Aplicamos string slicing para eliminar los ultimos 5 caracteres(.docx)
+            nombre_archivo = os.path.basename(ruta_formato)[:-5]
             
-    #         '''Valido solo en windows
-    #          nombre_archivo=ruta_formato.split("\\")
-    #          print(nombre_archivo[-1])
-    #         '''
-
-           
-    #         documento_plantilla = DocxTemplate(ruta_formato)
+            '''Valido solo en windows
+             nombre_archivo=ruta_formato.split("\\")
+             print(nombre_archivo[-1])
+            '''
+            documento_plantilla = DocxTemplate(ruta_formato)
             
-    #         # listado_formatos.append({'formato':nombre_archivo,'documento_procesado':documento_plantilla})
+            # listado_formatos.append({'formato':nombre_archivo,'documento_procesado':documento_plantilla})
             
-    #         imagen_firma = InlineImage(documento_plantilla,ruta_firma, width=Mm(40))
+            imagen_firma = InlineImage(documento_plantilla,self.ruta_firma, width=Mm(40))
 
-    #         documento_plantilla.render(datos_a_diligenciar)
+            documento_plantilla.render(self.datos_a_diligenciar)
             
-    #         # creamos la carpeta de la persona
-    #         # os.makedirs(f"{self.ruta_almacenamiento}\\{datos_a_diligenciar['nombre_completo']}", exist_ok=True)
-    #         documento_plantilla.save(fr'{self.ruta_carpeta_persona}\{nombre_archivo}_{datos_a_diligenciar["nombre_completo"]}_{datos_a_diligenciar["cedula_ciudadania"]}.docx')
+            # creamos la carpeta de la persona
+            # os.makedirs(f"{self.ruta_almacenamiento}\\{self.datos_a_diligenciar['nombre_completo']}", exist_ok=True)
+            documento_plantilla.save(fr'{self.ruta_carpeta_persona}\{nombre_archivo}_{self.datos_a_diligenciar["nombre_completo"]}_{self.datos_a_diligenciar["cedula_ciudadania"]}.docx')
 
-    #     print(ruta_carpeta_plantilla_administrativos)
-        pass
+        print(ruta_carpeta_plantilla_administrativos)
+        
 
 
     def firmar_formatos_antibiotico(self):
@@ -79,6 +78,26 @@ class Firma_documentos():
                                  and i.endswith('.docx')]
         for i in archivos_antibioticos:
             ruta_formato = os.path.join(ruta_carpeta_plantilla_antibioticos,i)
+            nombre_archivo = os.path.basename(ruta_formato)[:-5]
+            documento_plantilla = DocxTemplate(ruta_formato)
+            imagen_firma = InlineImage(documento_plantilla,self.ruta_firma, width=Mm(40), height=Mm(30))
+            print(self.ruta_firma)
+            self.datos_a_diligenciar["firma"] = imagen_firma
+            documento_plantilla.render(self.datos_a_diligenciar)
+            # os.makedirs(f"{self.ruta_carpetas_plantillas}\\Formatos_Firmados\\Antibiotico\\{self.datos_a_diligenciar['nombre_completo']}", exist_ok=True)
+            documento_plantilla.save(fr'{self.ruta_carpeta_persona}\{nombre_archivo}_{self.datos_a_diligenciar["nombre_completo"]}_{self.datos_a_diligenciar["cedula_ciudadania"]}.docx')
+
+    def firmar_formatos_cuidador(self):
+        ruta_carpeta_plantilla_cuidador= os.path.join(self.ruta_carpetas_plantillas, 'Plantillas_cuidador')
+        ruta_firma = fr"{os.path.join(os.path.dirname(__file__),'firma_prueba.jpg')}"
+        print(ruta_firma)
+
+        # List comprehension
+        archivos_cuidador = [i for i in os.listdir(ruta_carpeta_plantilla_cuidador)
+                                 if os.path.isfile(os.path.join(ruta_carpeta_plantilla_cuidador,i))
+                                 and i.endswith('.docx')]
+        for i in archivos_cuidador:
+            ruta_formato = os.path.join(ruta_carpeta_plantilla_cuidador,i)
             nombre_archivo = os.path.basename(ruta_formato)[:-5]
             documento_plantilla = DocxTemplate(ruta_formato)
             imagen_firma = InlineImage(documento_plantilla,self.ruta_firma, width=Mm(40), height=Mm(30))

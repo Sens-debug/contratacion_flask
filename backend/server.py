@@ -194,6 +194,10 @@ def actualizar_estado_firma():
                         set usuarios.estado_firma=%s 
                        WHERE usuarios.id=%s""",(id_estado_firma,id_usuario))
         conexion.commit()
+        cursor.execute("""update usuarios
+                        set usuarios.ruta_firma=%s 
+                       WHERE usuarios.id=%s""",(None,id_usuario))
+        conexion.commit()
         cursor.close()
         conexion.close()
         return jsonify({"mensaje":"Actualizacion Exitosa"}),200
@@ -311,6 +315,11 @@ def upload_file():
         ruta_carpeta_persona  = os.path.abspath(os.path.join(ruta_carpeta_archivos,area,cargo,nombre_completo))
         print(ruta_carpeta_persona)
         ruta_archivo_bucle= fr"{ruta_carpeta_persona}\{nombre_archivo}_{nombre_completo}.{tipo_archivo}" 
+        
+        if errores :
+            return jsonify({
+            "mensaje": f"Algunos archivos no se subieron.{errores}"
+        }), 400
 
         try:
             with open(ruta_archivo_bucle ,"wb") as f:
@@ -341,8 +350,6 @@ def upload_file():
     conexion.close()
     
     if res[0] == 2:
-        from firma_fomatos.firma_documentos import Firma_documentos
-        firma =Firma_documentos(nombre_completo,direccion,cedula,correo_electronico,telefono,area,cargo,tipo_sangre,fecha_nacimiento, ruta_carpeta_persona, ruta_firma)
         conexion = obtener_conexion_bd()
         cursor = conexion.cursor()
         cursor.execute('select ruta_firma from usuarios where id=%s',(id_usuario,))
@@ -363,6 +370,8 @@ def upload_file():
 
         #si no ah firmado
         if res[0] == 0 or res[0]== None:
+            from firma_fomatos.firma_documentos import Firma_documentos
+            firma =Firma_documentos(nombre_completo,direccion,cedula,correo_electronico,telefono,area,cargo,tipo_sangre,fecha_nacimiento, ruta_carpeta_persona, ruta_firma)
             print("entro al estado firma")
             print(type(cargo_id))
             if cargo_id == '1':

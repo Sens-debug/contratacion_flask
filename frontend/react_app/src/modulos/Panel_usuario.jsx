@@ -50,6 +50,8 @@ function Panel_usuario(){
       () => Array.from(estado_firma_a_elegir).join(", ").replaceAll("_", " "),
       [estado_firma_a_elegir],);
       const [mensaje_back, set_mensaje_back] = useState("")
+      const [cedula_a_buscar, set_cedula_a_buscar] = useState("")
+
 
       const [fecha_nacimiento, set_fecha_nacimiento] = useState()
 
@@ -259,6 +261,14 @@ function Panel_usuario(){
                 <DropdownItem key="1">Antibiotico</DropdownItem>
                 <DropdownItem key="2">Cuidador</DropdownItem>
                 <DropdownItem key="3">Permanente</DropdownItem>
+                <DropdownItem key="4">AuditorContratacion</DropdownItem>
+                <DropdownItem key="5">Nutricionista</DropdownItem>
+                <DropdownItem key="6">Psicologo</DropdownItem>
+                <DropdownItem key="7">Terapeuta Fisico</DropdownItem>
+                <DropdownItem key="8">Terapeuta Ocupacional</DropdownItem>
+                <DropdownItem key="9">Terapeuta Respiratorio</DropdownItem>
+                <DropdownItem key="10">Fonoaudiologo</DropdownItem>
+                <DropdownItem key="11">Medico General</DropdownItem>
               </DropdownMenu>
             </Dropdown>
             
@@ -423,6 +433,10 @@ function Panel_usuario(){
             className="bg-white w-full max-w-xs flex flex-col px-4 py-2"
             >
               <h1 className="w-full bg-gray-300 font-medium text-center">Establecer Estado de la Firma</h1>
+              <Input
+              value={cedula_a_buscar}
+              label="Digita la cedula a buscar"
+              type="text"></Input>
                <Dropdown>
                 <DropdownTrigger>
                   <Button className="capitalize rounded-xl border-2 border-black  bg-blue-500 hover:bg-blue-900 transition py-4" variant="bordered">
@@ -441,8 +455,6 @@ function Panel_usuario(){
                   {usuarios_en_sistema.map((item)=> (
                   <DropdownItem className="w-full bg-black text-white border-2 border-white"
                   key={item[0]}>{item[1]}-{item[2]}_{item[3]}</DropdownItem>
-
-
                   ))}
                   
                 </DropdownMenu>
