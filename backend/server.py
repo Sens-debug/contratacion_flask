@@ -346,6 +346,12 @@ def upload_file():
             
     conexion = obtener_conexion_bd()
     cursor= conexion.cursor()
+    cursor.execute("select * from metadatos_aceptacionxusuario where usuario_id =%s",(id_usuario,))
+    if not cursor.fetchone():
+        cursor.execute("""insert into metadatos_aceptacionxusuario (direccion_ip, navegador, usuario_id)
+                        Values (%s,%s,%s)""",(direccion_ip_peticion,navegador_peticion,id_usuario))
+        conexion.commit()
+
     cursor.execute("select estado_id from usuariosxestado WHERE usuariosxestado.id_usuario=%s",(id_usuario,))
     res = cursor.fetchone()
     cursor.close()
@@ -388,11 +394,14 @@ def upload_file():
             cursor = conexion.cursor()
             cursor.execute("update usuarios set estado_firma=1 where id =%s", (id_usuario,))
             conexion.commit()
-            cursor.execute("""insert into metadatos_aceptacionxusuario (direccion_ip, navegador, usuario_id)
-                           Values (%s,%s,%s)""",(direccion_ip_peticion,navegador_peticion,id_usuario))
-            conexion.commit()
-            cursor.close()
-            conexion.close()
+            
+            cursor.execute("select * from metadatos_aceptacionxusuario where usuario_id =%s",(id_usuario,))
+            if not cursor.fetchone(): 
+                cursor.execute("""insert into metadatos_aceptacionxusuario (direccion_ip, navegador, usuario_id)
+                               Values (%s,%s,%s)""",(direccion_ip_peticion,navegador_peticion,id_usuario))
+                conexion.commit()
+                cursor.close()
+                conexion.close()
 
             
 
@@ -425,5 +434,15 @@ def obtener_campos_crear_usuarios():
         print(columna)
     return jsonify({'retorno':retorno})
 
+@app.route("/obtener_aceptacion_tratamiento_datos", methods=["POST"])
+def obtener_aceptacion_tratamiento_datos():
+    peticion=request.json
+    id_usuario = peticion.get("id_usuario")
+    conexion = obtener_conexion_bd()
+    cursor = conexion.cursor()
+    cursor.execute("select * from metadatos_aceptacionxusuario where usuario_id =%s",(id_usuario,))
+    if not cursor.fetchone():
+        return jsonify({"acepta":False}),200
+    return jsonify({"acepta":True}),200
 if __name__ == '__main__':  
     app.run(debug=True,  host= '0.0.0.0' ,port=5009)
