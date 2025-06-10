@@ -9,12 +9,12 @@ import {DateInput} from "@heroui/react";
 
 
 
-
 function Panel_usuario(){
     const location = useLocation();
     const datos = location.state||{}; //<-- Acá accedo al state del anterior, pero no puedo trabajar bien con él
     const datos_recibidos_login = datos.datos || {};  // <--- acá extraigo "datos"
     //ESTE ESTADO ES PARA MANEJAR LOS ARCHIVOS QUE VAMOS A ENVIAR
+    console.log(datos_recibidos_login)
     const [archivo, setArchivo] = useState({})
     const [estado_subida, set_estado_subida] = useState('')
     const navegacion = useNavigate();
@@ -49,13 +49,11 @@ function Panel_usuario(){
       const estado_firma_seleccionado = React.useMemo(
       () => Array.from(estado_firma_a_elegir).join(", ").replaceAll("_", " "),
       [estado_firma_a_elegir],);
-      const [mensaje_back, set_mensaje_back] = useState("")
-      const [cedula_a_buscar, set_cedula_a_buscar] = useState("")
+      const [mensaje_back, set_mensaje_back] = useState("");
+      const [cedula_a_buscar, set_cedula_a_buscar] = useState("");
 
-
-      const [fecha_nacimiento, set_fecha_nacimiento] = useState()
-
-    
+      const [fecha_nacimiento, set_fecha_nacimiento] = useState();
+      const [aceptoPolitica, setAceptoPolitica] = useState(false);
 
     useEffect(()=>{
         if(datos_recibidos_login.cargo_id!=4){
@@ -513,6 +511,10 @@ function Panel_usuario(){
 
     const manejarEnvio =(v_control) =>{
         v_control.preventDefault();
+         if (!aceptoPolitica) {
+        alert("Debes aceptar la política de tratamiento de datos.");
+        return;
+      }
         //Trabajamos con el state {archivo}
         if (!archivo) return;
 
@@ -545,7 +547,8 @@ function Panel_usuario(){
     }
     
 
-    if(datos_recibidos_login.cargo_id!=4){  
+    if(datos_recibidos_login.cargo_id!=4){ 
+
         
          return(
         <div className="min-h-screen w-screen bg-gray-900">
@@ -561,6 +564,23 @@ function Panel_usuario(){
                 <form onSubmit={manejarEnvio}
                 className="border-4 border-blue-300 max-w-screen"
                 >
+                  <div className="bg-white">
+                     <label className=" gap-2 text-sm text-gray-700">
+                          <input
+                            type="checkbox"
+                            checked={aceptoPolitica}
+                            onChange={(e) => setAceptoPolitica(e.target.checked)}
+                            className="form-checkbox text-blue-600"
+                          />
+                          He leído y acepto la política de tratamiento de datos
+                        </label>
+                        <br />
+                        <a  className ='text-blue-500 hover:text-blue-600' target ="_blank" href="https://drive.google.com/file/d/1D8oa0i422lA4sTEHhNoxGI4zJETDv_iU/view?usp=sharing">Ver politica tratamiento Datos</a>
+                      
+                      <br />
+                      <p className="border-b p-2"></p>
+                      
+                    </div>
                     {documentos_necesarios.map((item)=> ( 
                         <div className="bg-white">
                             <label className="">{item}</label>

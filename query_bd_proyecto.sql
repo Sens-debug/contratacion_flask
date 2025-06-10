@@ -60,17 +60,23 @@ create table usuariosxestado(id_usuario int ,
                             );
  
 
+create table metadatos_aceptacionxusuario(id int primary key auto_increment,
+                                            direccion_ip varchar(50),
+                                            navegador varchar(100),
+                                            usuario_id int,
+                                            Foreign Key (usuario_id) references usuarios (id)
+                                            );
 
 INSERT INTO cargos (id, Cargo) VALUES (1, 'Antibiotico'), (2, 'Cuidador'), (3, 'Permanente'),(4,'AuditorContratacion'),(5,'Nutricionista'),
-(6,'Psicologo'),(7,'Terapeuta Fisico'),(8,'Terapeuta ocupacional'),(9,'Terapeuta Respiratorio')(10,'Fonoaudiolgo'),(11,'Medico General');
+(6,'Psicologo'),(7,'Terapeuta Fisico'),(8,'Terapeuta ocupacional'),(9,'Terapeuta Respiratorio'),(10,'Fonoaudiolgo'),(11,'Medico General');
 
-INSERT INTO estados (id, estado) VALUES (1, 'seleccion'), (2, 'contratacion'), (3, 'cancelado'), (4, 'completado');
+INSERT INTO estados (id, estado) VALUES (1, 'seleccion'), (2, 'contratacion'), (3, 'cancelado'), (4, 'completado'),(5,"contratado");
 
 INSERT INTO areas (id,area) VALUES (1,'Administrativo'), (2, 'Asistencial');
 
 INSERT INTO tipos_sangre (id,tipo) VALUES (1, '0-'),(2, '0+'),(3, 'A-'),(4, 'A+'),(5, 'B-'),(6, 'B+'),(7, 'AB-'),(8, 'AB+');
 
-INSERT INTO cargosxarea (cargo_id,area_id) VALUES (1,2),(2,2),(3,2),(4,1);
+INSERT INTO cargosxarea (cargo_id,area_id) VALUES (1,2),(2,2),(3,2),(5,2),(6,2),(7,2),(8,2),(9,2),(10,2),(11,2);
 
 INSERT INTO documentos (id,documento) VALUES (1,'Hoja_Vida_Firmada_Con_Foto'),(2,'Doc_Identidad_150%'),(3,'Postulacion_Al_Cargo'),(4,'Formato_Entrevista-Prueba_Seleccion'),
 (5,'Certificado_Estudio'),(6,'Convalidacion_Ministerio_Edcucacion(Educacion_Exterior)'),(7,'Registro_RETHUS'),(8,'Certificado_Etica_Medica'),
@@ -105,7 +111,7 @@ INSERT INTO documentosxcargoxestado (cargo_id,documento_id,estado_id) VALUES
 (2,21,2),(2,22,2),(2,23,2),(2,24,2),(2,26,2),(2,27,2),(2,28,2),(2,29,2),(2,32,2),(2,33,2),(2,34,2),
 
 (3,1,2),(3,2,2),(3,3,2),(3,4,2),(3,5,2),(3,6,2),(3,7,2),(3,9,2),(3,10,2),(3,11,2),(3,12,2),(3,13,2),(3,14,2),(3,20,2),(3,21,2),(3,22,2),(3,23,2),(3,24,2),(3,25,2),
-(3,26,2),(3,27,2),(3,28,2),(3,29,2),(3,30,2),(3,31,2),(3,32,2),(3,33,2),(3,34,2);
+(3,26,2),(3,27,2),(3,28,2),(3,29,2),(3,30,2),(3,31,2),(3,32,2),(3,33,2),(3,34,2),
 
 (5,1,2),(5,2,2),(5,3,2),(5,4,2),(5,5,2),(5,6,2),(5,7,2),(5,9,2),(5,10,2),(5,11,2),(5,12,2),(5,13,2),(5,14,2),(5,15,2),(5,16,2),(5,17,2),(5,18,2),(5,19,2),(5,20,2),(5,21,2),(5,22,2),
 (5,23,2),(5,25,2),(5,26,2),(5,27,2),(5,28,2),(5,29,2),(5,32,2),(5,33,2),(5,34,2),
@@ -125,8 +131,8 @@ INSERT INTO documentosxcargoxestado (cargo_id,documento_id,estado_id) VALUES
 (10,1,2),(10,2,2),(10,3,2),(10,4,2),(10,5,2),(10,6,2),(10,7,2),(10,9,2),(10,10,2),(10,11,2),(10,12,2),(10,13,2),(10,14,2),(10,15,2),(10,16,2),(10,17,2),(10,18,2),(10,19,2),(10,20,2),(10,21,2),(10,22,2),
 (10,23,2),(10,25,2),(10,26,2),(10,27,2),(10,28,2),(10,29,2),(10,32,2),(10,33,2),(10,34,2),
 
-(11,1,2),(11,2,2),(11,3,2),(11,4,2),(11,5,2),(11,6,2),(11,7,2),(11,8,2)(11,9,2),(11,10,2),(11,11,2),(11,12,2),(11,13,2),(11,14,2),(11,15,2),(11,16,2),(11,17,2),(11,18,2),(11,19,2),(11,20,2),(11,21,2),(11,22,2),
-(11,23,2),(11,25,2),(11,26,2),(11,27,2),(11,28,2),(11,29,2),(11,32,2),(11,33,2),(11,34,2),
+(11,1,2),(11,2,2),(11,3,2),(11,4,2),(11,5,2),(11,6,2),(11,7,2),(11,8,2),(11,9,2),(11,10,2),(11,11,2),(11,12,2),(11,13,2),(11,14,2),(11,15,2),(11,16,2),(11,17,2),(11,18,2),(11,19,2),(11,20,2),(11,21,2),(11,22,2),
+(11,23,2),(11,25,2),(11,26,2),(11,27,2),(11,28,2),(11,29,2),(11,32,2),(11,33,2),(11,34,2);
 
 
 INSERT INTO usuarios(id,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,direccion_residencia,cedula_ciudadania,

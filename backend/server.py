@@ -292,6 +292,8 @@ def upload_file():
     fecha_nacimiento = request.form.get('f_nacimiento')
     telefono = request.form.get('tel')
     cargo_id = request.form.get('cargo_id')
+    direccion_ip_peticion = request.remote_addr
+    navegador_peticion = request.user_agent.string
 
     
     errores = []
@@ -314,7 +316,7 @@ def upload_file():
         os.makedirs(fr"{ruta_carpeta_archivos}\{area}\{cargo}\{nombre_completo}", exist_ok=True)
         ruta_carpeta_persona  = os.path.abspath(os.path.join(ruta_carpeta_archivos,area,cargo,nombre_completo))
         print(ruta_carpeta_persona)
-        ruta_archivo_bucle= fr"{ruta_carpeta_persona}\{nombre_archivo}_{nombre_completo}.{tipo_archivo}" 
+        ruta_archivo_bucle= fr"{ruta_carpeta_persona}\{nombre_archivo}.{tipo_archivo}" 
         
         if errores :
             return jsonify({
@@ -348,7 +350,7 @@ def upload_file():
     res = cursor.fetchone()
     cursor.close()
     conexion.close()
-    
+    #si estado_id =02 || estado= contratacion  
     if res[0] == 2:
         conexion = obtener_conexion_bd()
         cursor = conexion.cursor()
@@ -356,7 +358,7 @@ def upload_file():
         res = cursor.fetchone()
         cursor.close()
         conexion.close()
-        
+        #Si no hay firma registrada en sistema
         if res[0] == None:
             return jsonify({"mensaje":"La firma es de caracter oblogatorio"}),400
         conexion = obtener_conexion_bd()
@@ -376,12 +378,22 @@ def upload_file():
             print(type(cargo_id))
             if cargo_id == '1':
                 firma.firmar_formatos_antibiotico()
+            if cargo_id == '2':
+                firma.firmar_formatos_cuidador()
+            if cargo_id == '3':
+                firma.firmar_formatos_permanentes()
+            if cargo_id =='6' :
+                firma.firmar_formatos_profesionales()
             conexion = obtener_conexion_bd()
             cursor = conexion.cursor()
             cursor.execute("update usuarios set estado_firma=1 where id =%s", (id_usuario,))
             conexion.commit()
+            cursor.execute("""insert into metadatos_aceptacionxusuario (direccion_ip, navegador, usuario_id)
+                           Values (%s,%s,%s)""",(direccion_ip_peticion,navegador_peticion,id_usuario))
+            conexion.commit()
             cursor.close()
             conexion.close()
+
             
 
      #Firma de los formatos posterior a subir la firma

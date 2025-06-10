@@ -65,8 +65,6 @@ class Firma_documentos():
 
         print(ruta_carpeta_plantilla_administrativos)
         
-
-
     def firmar_formatos_antibiotico(self):
         ruta_carpeta_plantilla_antibioticos= os.path.join(self.ruta_carpetas_plantillas, 'Plantillas_antibioticos')
         ruta_firma = fr"{os.path.join(os.path.dirname(__file__),'firma_prueba.jpg')}"
@@ -104,10 +102,42 @@ class Firma_documentos():
             print(self.ruta_firma)
             self.datos_a_diligenciar["firma"] = imagen_firma
             documento_plantilla.render(self.datos_a_diligenciar)
-            # os.makedirs(f"{self.ruta_carpetas_plantillas}\\Formatos_Firmados\\Antibiotico\\{self.datos_a_diligenciar['nombre_completo']}", exist_ok=True)
             documento_plantilla.save(fr'{self.ruta_carpeta_persona}\{nombre_archivo}_{self.datos_a_diligenciar["nombre_completo"]}_{self.datos_a_diligenciar["cedula_ciudadania"]}.docx')
 
-        
+    def firmar_formatos_permanentes(self):
+        ruta_carpeta_plantilla_cuidador= os.path.join(self.ruta_carpetas_plantillas, 'Plantillas_permanente')
+
+        # List comprehension
+        archivos_cuidador = [i for i in os.listdir(ruta_carpeta_plantilla_cuidador)
+                                 if os.path.isfile(os.path.join(ruta_carpeta_plantilla_cuidador,i))
+                                 and i.endswith('.docx')]
+        for i in archivos_cuidador:
+            ruta_formato = os.path.join(ruta_carpeta_plantilla_cuidador,i)
+            nombre_archivo = os.path.basename(ruta_formato)[:-5]
+            documento_plantilla = DocxTemplate(ruta_formato)
+            imagen_firma = InlineImage(documento_plantilla,self.ruta_firma, width=Mm(40), height=Mm(30))
+            print(self.ruta_firma)
+            self.datos_a_diligenciar["firma"] = imagen_firma
+            documento_plantilla.render(self.datos_a_diligenciar)
+            documento_plantilla.save(fr'{self.ruta_carpeta_persona}\{nombre_archivo}_{self.datos_a_diligenciar["nombre_completo"]}_{self.datos_a_diligenciar["cedula_ciudadania"]}.docx')
+
+    def firmar_formatos_profesionales(self):
+        ruta_carpeta_plantilla_cuidador= os.path.join(self.ruta_carpetas_plantillas, 'Plantillas_profesionales')
+
+        # List comprehension
+        archivos_cuidador = [i for i in os.listdir(ruta_carpeta_plantilla_cuidador)
+                                 if os.path.isfile(os.path.join(ruta_carpeta_plantilla_cuidador,i))
+                                 and i.endswith('.docx')]
+        for i in archivos_cuidador:
+            ruta_formato = os.path.join(ruta_carpeta_plantilla_cuidador,i)
+            nombre_archivo = os.path.basename(ruta_formato)[:-5]
+            documento_plantilla = DocxTemplate(ruta_formato)
+            imagen_firma = InlineImage(documento_plantilla,self.ruta_firma, width=Mm(40), height=Mm(30))
+            print(self.ruta_firma)
+            self.datos_a_diligenciar["firma"] = imagen_firma
+            documento_plantilla.render(self.datos_a_diligenciar)
+            documento_plantilla.save(fr'{self.ruta_carpeta_persona}\{nombre_archivo}_{self.datos_a_diligenciar["nombre_completo"]}_{self.datos_a_diligenciar["cedula_ciudadania"]}.docx')
+
 
 # signer =Firma_documentos('','','','','','','','','','','','')
 # signer.firmar_formatos_administrativo()
