@@ -358,16 +358,14 @@ def upload_file():
 
     estado_usuario = obtener_estadoid_usuario(id_usuario)
     
-    # if estado_usuario==2 and  request.files.get("Firma")== None or request.files.get('Firma').filename!= 'Firma' :
-    #     print("error firma 1")
-    #     return jsonify({"mensaje":"La firma es de cararcter obligatorio"})
+
    
 
     verificar_aceptacion_politica_tratamiento_datos(id_usuario,direccion_ip_peticion,navegador_peticion)  
     errores = []
     lista_archivos =[i for i in archivos.items()]
     print(lista_archivos[-1])
-    if not 'Firma' in lista_archivos[-1]:
+    if estado_usuario ==2 and not 'Firma' in lista_archivos[-1]:
         return jsonify({"mensaje":"La firma es obligatoria"})
 
     for nombre_archivo, archivo in archivos.items():

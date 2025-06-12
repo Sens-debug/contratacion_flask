@@ -135,6 +135,7 @@ function Panel_usuario(){
                        console.log("Respuesta del servidor:", data);
                      })
                      .catch(error => console.error("Error al enviar:", error));
+                     alert("Se creo el usuario exitosamente")
                      window.location.reload()
                                
     }

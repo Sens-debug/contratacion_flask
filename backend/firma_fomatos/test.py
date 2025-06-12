@@ -41,4 +41,4 @@
 # # doc.save(r'C:\Users\Sistemas\Desktop\try_contratacion\backend\firma_fomatos\prueba.docx')
 
 
-print(len(R"C:\Users\Sistemas\Desktop\contratacion_flask\backend\archivos\Asistencial\Cuidador\A  D D\Certificado_Afiliacion_EPS-AFP-CESANTIAS_A  D D.pdf"))
+print(len(R"E:\NUEVO SERVIDOR\3. TID-REGISTROS-G-TALENTO HUMANO Y DESARROLLO ORGANIZACIONAL\01. GESTIÓN HUMANA\1. FORMATOS\3. CERTIFICADOS LABORALES, CESANTIAS, VACACIONES Y CARTA DE PRESENTACION\PDF CERTIFICADOS ENTREGADOS 2025\MAYO 2025"))
