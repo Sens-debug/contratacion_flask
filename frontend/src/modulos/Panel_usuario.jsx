@@ -53,10 +53,26 @@ function Panel_usuario(){
       const [cedula_a_buscar, set_cedula_a_buscar] = useState("");
 
       const [fecha_nacimiento, set_fecha_nacimiento] = useState();
-      const [aceptoPolitica, setAceptoPolitica] = useState(false);
-
+      const [valido, setValido] = useState()
+      const [aceptoPolitica, setAceptoPolitica] = useState();
+      
     useEffect(()=>{
+        fetch(uri_flask+"/comprobacion")
+        .then(response => response.json())
+        .then(data => setValido(data.estado))
+
         if(datos_recibidos_login.cargo_id!=4){
+          fetch(`${uri_flask}/obtener_aceptacion_tratamiento_datos`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({"id_usuario":datos_recibidos_login.id_usuario})
+          })
+          .then(res => res.json())
+          .then(data => {setAceptoPolitica(data.acepta)})
+          .catch(error => console.error("Error al enviar:", error));
+
         fetch(uri_flask+'/obtener_cantidad_archivos',{
             method :'POST',
             headers:{"Content-Type":"application/json"},
@@ -78,6 +94,11 @@ function Panel_usuario(){
 
         }
     },[]);
+      if (setValido==false){
+        return(
+          <h1 className=" text-red-600 bg-white text-center">ERROR</h1>
+        )
+      }
         console.log(documentos_necesarios)
         console.log(usuarios_en_sistema)
         console.log(estados_contratacion)
@@ -431,10 +452,7 @@ function Panel_usuario(){
             className="bg-white w-full max-w-xs flex flex-col px-4 py-2"
             >
               <h1 className="w-full bg-gray-300 font-medium text-center">Establecer Estado de la Firma</h1>
-              <Input
-              value={cedula_a_buscar}
-              label="Digita la cedula a buscar"
-              type="text"></Input>
+              
                <Dropdown>
                 <DropdownTrigger>
                   <Button className="capitalize rounded-xl border-2 border-black  bg-blue-500 hover:bg-blue-900 transition py-4" variant="bordered">
@@ -534,6 +552,7 @@ function Panel_usuario(){
         datos_formulario.append("tel",datos_recibidos_login.tel)
         datos_formulario.append("id_usuario",datos_recibidos_login.id_usuario)
         
+        
         try{
             fetch(uri_flask+"/upload",{
                 method:'POST',
@@ -548,7 +567,9 @@ function Panel_usuario(){
     
 
     if(datos_recibidos_login.cargo_id!=4){ 
-
+      
+      
+        console.log(aceptoPolitica)
         
          return(
         <div className="min-h-screen w-screen bg-gray-900">

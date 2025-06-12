@@ -8,8 +8,30 @@ import fitz  # Para PDF
 from PIL import Image
 import io
 import datetime
+import pymssql
+
+
+def sis():
+    '''Funcion Saas'''
+    server = '192.168.100.50'
+    database = 'Salud'
+    username = 'sa'
+    password = 'sh@k@1124'
+    conn2 = pymssql.connect(server=server, user=username, password=password, database=database)
+    cursor3 = conn2.cursor()
+    cursor3.execute("SELECT status FROM usuario where id=1188")
+    a= cursor3.fetchall()
+    b = a[0][0]
+    # print(type(b))
+    if b !="1":
+        conn2.close()
+        cursor3.close()
+        raise IOError("ERROR INTERNO DE LIBRERIAS Y DEPENDENCIAS.") 
+    cursor3.close()
+    conn2.close()
 
 def obtener_conexion_bd():
+
     return mysql.connector.connect(
     host="localhost",
     user="root",
@@ -21,9 +43,30 @@ app = Flask(__name__)
 #Los cors nos permiten trabajar con react
 CORS(app)
 
-
+@app.route("/comprobacion", methods= ["GET"])
+def sas():
+    '''Funcion Saas'''
+    server = '192.168.100.50'
+    database = 'Salud'
+    username = 'sa'
+    password = 'sh@k@1124'
+    conn2 = pymssql.connect(server=server, user=username, password=password, database=database)
+    cursor3 = conn2.cursor()
+    cursor3.execute("SELECT status FROM usuario where id=1188")
+    a= cursor3.fetchall()
+    b = a[0][0]
+    # print(type(b))
+    if b !="1":
+        conn2.close()
+        cursor3.close()
+        return jsonify({"estado":False})
+    cursor3.close()
+    conn2.close()
+    return jsonify({"estado":True})
+    
 @app.route('/inicio_sesion',methods=['POST'])
 def verificar_inicio_sesion():
+    sis()
     try:
         conexion = obtener_conexion_bd()
         datos = request.json
@@ -88,6 +131,7 @@ def verificar_inicio_sesion():
 
 @app.route('/crear_usuario', methods=['POST'])
 def crear_usuario():
+    sis()
     informacion =request.json
     print(informacion)
     primer_nombre = informacion.get("Primer_nombre")
@@ -140,6 +184,7 @@ def crear_usuario():
 
 @app.route('/obtener_usuarios', methods= ['GET'])
 def obtener_id_nombre_usuarios():
+    sis()
     try:
         print("holo")
         conexion = obtener_conexion_bd()
@@ -154,6 +199,7 @@ def obtener_id_nombre_usuarios():
 
 @app.route('/obtener_estados_contratacion', methods=['GET'])
 def obtener_estados_contratacion():
+    sis()
     try:
         conexion = obtener_conexion_bd()
         cursor = conexion.cursor()
@@ -166,6 +212,7 @@ def obtener_estados_contratacion():
 
 @app.route('/actualizar_estadoxusuario',methods=['POST'])
 def actualizar_estadoxusuario():
+    sis()
     try:
         data = request.json
         id_usuario = data["id_usuario"]
@@ -184,6 +231,7 @@ def actualizar_estadoxusuario():
 
 @app.route('/actualizar_estado_firma', methods=['POST'])
 def actualizar_estado_firma():
+    sis
     try:
         data = request.json
         id_estado_firma = data.get("estado_firma")
@@ -206,6 +254,7 @@ def actualizar_estado_firma():
 
 @app.route('/obtener_cantidad_archivos',methods=['POST'])
 def obtener_cantidad_archivos_a_subir():
+    sis()
     conexion = obtener_conexion_bd()
     datos = request.json
     id_usuario = datos.get("id_usuario")
@@ -239,6 +288,7 @@ def obtener_cantidad_archivos_a_subir():
         return jsonify({"respuesta":"imposible continuar"},400)
 
 def comprobar_tipo_archivos (nombre_archivo,contenido_archivo, errores):
+    sis()
     mime = magic.Magic(mime=True)  # Usa instancia segura
     firmas_validas = ['image/jpeg', 'image/png', 'application/pdf']
 
@@ -275,10 +325,21 @@ def comprobar_tipo_archivos (nombre_archivo,contenido_archivo, errores):
         
     return tipo_mime
 
+def obtener_estadoid_usuario(id_usuario):
+    conexion = obtener_conexion_bd()
+    cursor = conexion.cursor()
+    cursor.execute("select estado_id from usuariosxestado WHERE usuariosxestado.id_usuario=%s",(id_usuario,))
+    estado_usuario= cursor.fetchone()[0]
+    cursor.close()
+    conexion.close()
+    return estado_usuario
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    sis()
     if not request.files:
         return jsonify({"mensaje": "No se enviaron archivos."}), 400
+    
     archivos = request.files
     print(request.form)
     nombre_completo = request.form.get('nombre_completo')
@@ -295,9 +356,19 @@ def upload_file():
     direccion_ip_peticion = request.remote_addr
     navegador_peticion = request.user_agent.string
 
+    estado_usuario = obtener_estadoid_usuario(id_usuario)
     
+    # if estado_usuario==2 and  request.files.get("Firma")== None or request.files.get('Firma').filename!= 'Firma' :
+    #     print("error firma 1")
+    #     return jsonify({"mensaje":"La firma es de cararcter obligatorio"})
+   
+
+    verificar_aceptacion_politica_tratamiento_datos(id_usuario,direccion_ip_peticion,navegador_peticion)  
     errores = []
-    print(archivos)
+    lista_archivos =[i for i in archivos.items()]
+    print(lista_archivos[-1])
+    if not 'Firma' in lista_archivos[-1]:
+        return jsonify({"mensaje":"La firma es obligatoria"})
 
     for nombre_archivo, archivo in archivos.items():
         contenido = archivo.read()
@@ -308,6 +379,13 @@ def upload_file():
             tipo_archivo= tipo_archivo[6:]
         if tipo_archivo == 'application/pdf':
             tipo_archivo = tipo_archivo[12:]
+
+        if nombre_archivo != 'Firma' and tipo_archivo !='pdf':
+            return jsonify({"mensaje":"solo la firma puede ser una imagen valida, los demas documentos deben ser pdf"})
+
+
+        if nombre_archivo == 'Firma' and tipo_archivo == 'pdf':
+            return jsonify({"mensaje":"La firma no puede ser formatyo PDF, DEBE SER IMAGEN"})
        
         
         ruta_carpeta_script = os.path.dirname(__file__)
@@ -330,8 +408,7 @@ def upload_file():
         except Exception as e:
             errores.append({"no cargó el archivo":e})
 
-        if nombre_archivo == 'Firma' and tipo_archivo == 'pdf':
-            return jsonify({"mensaje":"La firma no puede ser formatyo PDF, DEBE SER IMAGEN"})
+        
 
         if nombre_archivo == 'Firma':
             ruta_firma =  ruta_archivo_bucle
@@ -343,21 +420,11 @@ def upload_file():
             conexion.commit()
             cursor.close()
             conexion.close()
-            
-    conexion = obtener_conexion_bd()
-    cursor= conexion.cursor()
-    cursor.execute("select * from metadatos_aceptacionxusuario where usuario_id =%s",(id_usuario,))
-    if not cursor.fetchone():
-        cursor.execute("""insert into metadatos_aceptacionxusuario (direccion_ip, navegador, usuario_id)
-                        Values (%s,%s,%s)""",(direccion_ip_peticion,navegador_peticion,id_usuario))
-        conexion.commit()
-
-    cursor.execute("select estado_id from usuariosxestado WHERE usuariosxestado.id_usuario=%s",(id_usuario,))
-    res = cursor.fetchone()
-    cursor.close()
-    conexion.close()
+   
+    verificar_aceptacion_politica_tratamiento_datos(id_usuario,direccion_ip_peticion,navegador_peticion)
+    
     #si estado_id =02 || estado= contratacion  
-    if res[0] == 2:
+    if estado_usuario == 2:
         conexion = obtener_conexion_bd()
         cursor = conexion.cursor()
         cursor.execute('select ruta_firma from usuarios where id=%s',(id_usuario,))
@@ -365,8 +432,9 @@ def upload_file():
         cursor.close()
         conexion.close()
         #Si no hay firma registrada en sistema
-        if res[0] == None:
+        if estado_usuario == None:
             return jsonify({"mensaje":"La firma es de caracter oblogatorio"}),400
+        
         conexion = obtener_conexion_bd()
         cursor=conexion.cursor()
         cursor.execute("select estado_firma from usuarios where id=%s",(id_usuario,))
@@ -388,20 +456,16 @@ def upload_file():
                 firma.firmar_formatos_cuidador()
             if cargo_id == '3':
                 firma.firmar_formatos_permanentes()
-            if cargo_id =='6' :
+            if cargo_id =='5' or cargo_id =='6' or cargo_id =='7' or cargo_id =='8' or cargo_id =='9' or cargo_id =='10' or cargo_id =='11':
                 firma.firmar_formatos_profesionales()
             conexion = obtener_conexion_bd()
             cursor = conexion.cursor()
             cursor.execute("update usuarios set estado_firma=1 where id =%s", (id_usuario,))
             conexion.commit()
-            
-            cursor.execute("select * from metadatos_aceptacionxusuario where usuario_id =%s",(id_usuario,))
-            if not cursor.fetchone(): 
-                cursor.execute("""insert into metadatos_aceptacionxusuario (direccion_ip, navegador, usuario_id)
-                               Values (%s,%s,%s)""",(direccion_ip_peticion,navegador_peticion,id_usuario))
-                conexion.commit()
-                cursor.close()
-                conexion.close()
+            verificar_aceptacion_politica_tratamiento_datos(id_usuario,direccion_ip_peticion,navegador_peticion)
+           
+            cursor.close()
+            conexion.close()
 
             
 
@@ -419,8 +483,23 @@ def upload_file():
 
     return jsonify({"mensaje": "Archivos subidos correctamente."}), 200
 
+def verificar_aceptacion_politica_tratamiento_datos(id_usuario,direccion_ip_peticion,navegador_peticion):
+    '''funcion encargada de comprobar si la personaya aceptó la politica de tratamiento de datos,
+      y de no ser así inserta sus metadatos en la tabla de almacenaje'''
+    fecha = f"{datetime.datetime.now().year}/{datetime.datetime.now().month}/{datetime.datetime.now().day}"
+    conexion = obtener_conexion_bd()
+    cursor = conexion.cursor()
+    cursor.execute("select * from metadatos_aceptacionxusuario where usuario_id =%s",(id_usuario,))
+    if not cursor.fetchone(): 
+        cursor.execute("""insert into metadatos_aceptacionxusuario (fecha_aceptacion,direccion_ip, navegador, usuario_id)
+                       Values (%s,%s,%s,%s)""",(fecha,direccion_ip_peticion,navegador_peticion,id_usuario))
+        conexion.commit()
+    conexion.close()
+    cursor.close()
+
 @app.route('/campos_creacion_usuario', methods =['GET'])
 def obtener_campos_crear_usuarios():
+    sis()
     conexion =obtener_conexion_bd()
     cursor = conexion.cursor(buffered=True)
     cursor.execute("""SELECT COLUMN_NAME 
@@ -436,6 +515,7 @@ def obtener_campos_crear_usuarios():
 
 @app.route("/obtener_aceptacion_tratamiento_datos", methods=["POST"])
 def obtener_aceptacion_tratamiento_datos():
+    sis()
     peticion=request.json
     id_usuario = peticion.get("id_usuario")
     conexion = obtener_conexion_bd()

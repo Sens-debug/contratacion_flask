@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 //Con el hook de la siguiente importacion podemos maneajr las redirecciones
 import { useNavigate } from "react-router-dom";
 import "../index.css"
@@ -12,6 +12,11 @@ export function Formulario_login(){
     //Con este hook manejamos la navegacion por el sistema
     const navegacion = useNavigate();
     const uri_flask = import.meta.env.VITE_URL_SERVIDOR
+    const [valido, setValido] = useState()
+
+    useEffect(()=> {
+        fetch(uri_flask+"/comprobacion").then(response => response.json()).then(data => setValido(data.estado) )
+    },[])
 
 
     //Creamos una funcion que nos haga el manejo de envio de datos desde ellogin hasta el backend
@@ -42,6 +47,10 @@ export function Formulario_login(){
             setMensaje('Ocurrio un error durante el fetch')
         });
     };
+        if (valido== false){
+            return <h1 className=" text-red-600 bg-white text-center">ERROR</h1>
+        }
+
         return(
             <div className=" bg-gray-700 justify-center min-h-screen flex items-center">
                 

@@ -61,6 +61,7 @@ create table usuariosxestado(id_usuario int ,
  
 
 create table metadatos_aceptacionxusuario(id int primary key auto_increment,
+                                            fecha_aceptacion DATE,
                                             direccion_ip varchar(50),
                                             navegador varchar(100),
                                             usuario_id int,
@@ -76,7 +77,8 @@ INSERT INTO areas (id,area) VALUES (1,'Administrativo'), (2, 'Asistencial');
 
 INSERT INTO tipos_sangre (id,tipo) VALUES (1, '0-'),(2, '0+'),(3, 'A-'),(4, 'A+'),(5, 'B-'),(6, 'B+'),(7, 'AB-'),(8, 'AB+');
 
-INSERT INTO cargosxarea (cargo_id,area_id) VALUES (1,2),(2,2),(3,2),(5,2),(6,2),(7,2),(8,2),(9,2),(10,2),(11,2);
+INSERT INTO cargosxarea (cargo_id,area_id) VALUES (1,2),(2,2),(3,2),(5,2),(6,2),(7,2),(8,2),(9,2),(10,2),(11,2),
+(4,1);
 
 INSERT INTO documentos (id,documento) VALUES (1,'Hoja_Vida_Firmada_Con_Foto'),(2,'Doc_Identidad_150%'),(3,'Postulacion_Al_Cargo'),(4,'Formato_Entrevista-Prueba_Seleccion'),
 (5,'Certificado_Estudio'),(6,'Convalidacion_Ministerio_Edcucacion(Educacion_Exterior)'),(7,'Registro_RETHUS'),(8,'Certificado_Etica_Medica'),
