@@ -94,7 +94,7 @@ function Panel_usuario(){
 
         }
     },[]);
-      if (setValido==false){
+      if (valido==false){
         return(
           <h1 className=" text-red-600 bg-white text-center">ERROR</h1>
         )
