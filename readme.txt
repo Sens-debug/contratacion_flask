@@ -1,11 +1,22 @@
-El principal objetivo del proyecto es simular el funcionamiento real de un aplicativo de contratacion, enviando archivos a través del protocolo HTTP
+Planteamiento del Problema -->Simular el funcionamiento real de un aplicativo de contratacion, enviando archivos a través del protocolo HTTP
+    El plantel empresarial tiene una problematica mayor, la cual es la gestion de papel,
+    esto debido a que la documentacion a firmar por los auxiliares es muy grande(aprox 20 paginas por persona)
+    Lo cual representa un gran gasto problematicas en la gestion general del area "Talento Humano"
 
-Se creó una carpeta Flask la cual contiene la logica del servidor, permitiendo así el flujo de archivos
-Tambien se establecio una interfaz tkinter que permite la seleccion y subida de un archivo a través de su PATH, conectandose a la URI del servidor Flask
+Solucion del Problema -- > Armar un Aplicativo que permita la transferencia de archivos, y a su vez contenga la logica para la firma automatica de los mismo
+    Se establecieorn las tecnologias a utilizar ->(Python-FLASK, JavaScript-REACT, MySQL)
 
-*   -Se requiere correr ambos scripts en consolas separadas para su correcto funcionamiento-*
+    GUI -> Se inicio con Tkinter(Se hizo el avance,pero el alcance del proyecto era muy grande para una app escritorio)
 
-Se modifico el parametro 'host' a = '0.0.0.0' esto para permitir el intercambiar paquetes dentro de la misma red,
-puesto que esto me crea una IPPRIVADA más allá del LocalHost, lo cual me permite trabajar en la red
+    GUIv2-> En react se desarrolaron 2 vistas para la gestion del aplicativo, se renderizan segun el cargo del usuario,
+        Maneja States y Effects que gestionan el SaaS y los datos a renderizar segun el cargo
+        Uso el .env para el enlace de mi Backend esto debido a que al ser local en una red inestable; ese valor es muy cambiante, y cuando  
+    
+    Backend -> Toda la logica a excepcion del modulo encargado de firmar los archivos está contenido en un Controller FLASK
+        Se implementan los endpoints con metodos HTTP, tambien se aplica el SaaS Al Backend
 
-Se deja un archivo .BD que constituye la query de inicializacion de la estructura de tablas -> Donde se manejara una estructura que permita ampliacion
+    El sistema maneja ciertas valdiaciones y excepciones para amarrarnos al lado legal del sistema,
+        entre ellas está la firma, los estados, y el almacenamiento de metadatos para el registro de aceptacion el politica de datos
+
+
+

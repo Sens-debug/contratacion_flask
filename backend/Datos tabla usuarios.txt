@@ -1,0 +1,76 @@
+Datos tabla usuarios == {
+                     primer_nombre varchar(20)not null,
+                     segundo_nombre varchar(20),
+                     primer_apellido varchar(20) not null,
+                     segundo_apellido varchar(20) not null,
+                     numero_cedula varchar(30),
+                     direccion varchar(100),
+                     correo varchar(70),
+                     telefono varchar(20),
+                     nombre_usuario varchar(30),
+                     contraseña_usuario varchar(10),
+                     cargo_id int,
+                     tipo_ingreso_id int,
+                     tipo_sangre_id int,
+                     FOREIGN Key (cargo_id) references cargos(id),
+                     FOREIGN Key (tipo_ingreso_id) references tipos_ingreso(id),
+                     Foreign Key (tipo_sangre_id) references tipos_sangre(id)
+                      );
+}
+
+Solicitar creación de documento legal para el check de aprobacion
+
+
+
+
+Formatos excluidos{
+
+Administrativo{
+Formato Induccion-Reinduccion(registro, sí)
+Encuesta consuma SPA
+¿Autorización Datos Personales?
+Formato inducción general
+Autoreporte Condiciones de Salud
+}
+
+Antibioticos{
+Formato Induccion-Reinduccion(registro, sí)
+Encuesta consuma SPA
+¿Autorización Datos Personales?
+Formato inducción general
+Autoreporte Condiciones de Salud
+Formato entrenamiento Auxilixar AntibioticoTerapia y Clinica Heridas
+Comrpomiso con el SGSST
+}
+
+Cuidadores{
+Formato Induccion-Reinduccion(registro, sí)
+Encuesta consuma SPA
+¿Autorización Datos Personales?
+Formato inducción general
+Autoreporte Condiciones de Salud
+Formato entrenamiento Auxilixar AntibioticoTerapia y Clinica Heridas
+Comrpomiso con el SGSST
+}
+
+Permanentes{
+Formato Induccion-Reinduccion(registro, sí)
+Encuesta consuma SPA
+¿Autorización Datos Personales?
+Formato inducción general
+Autoreporte Condiciones de Salud
+Formato entrenamiento Auxilixar AntibioticoTerapia y Clinica Heridas
+Comrpomiso con el SGSST
+}
+
+Profesionales{
+Formato Induccion-Reinduccion(registro, sí)
+Encuesta consuma SPA
+¿Autorización Datos Personales?
+Formato inducción general
+Autoreporte Condiciones de Salud
+Formato entrenamiento Auxilixar AntibioticoTerapia y Clinica Heridas
+Comrpomiso con el SGSST
+}
+
+}
