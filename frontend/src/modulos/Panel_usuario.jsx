@@ -20,7 +20,7 @@ function Panel_usuario(){
     const [documentos_necesarios, set_documentos_necesarios]= useState([])
     const [usuarios_en_sistema, set_usuarios_en_sistema] = useState([])
     const [estados_contratacion, set_estados_contratacion] = useState([])
-
+    const [lista_usuarios,set_lista_usuarios] = useState([])
       const [estados_a_seleccionar, set_estados_a_seleccionar] = React.useState(["Seleccione estado Contratacion"]);
       const estado_seleccionado = React.useMemo(
       () => Array.from(estados_a_seleccionar).join(", ").replace(/_/g, ""),
@@ -135,7 +135,15 @@ function Panel_usuario(){
     }
 
     if(datos_recibidos_login.cargo_id==4){
-      
+      async function traerListaUsuarios(e) {
+        e.preventDefault();
+        fetch(uri_flask+"/traer_todos_usuarios")
+        .then(response=>response.json())
+        .then(data =>{set_lista_usuarios(data.usuarios);console.log(data.usuarios)})
+        .catch(error=> console.log(error));
+        console.log(lista_usuarios)
+        
+      }
     
       function actualizar_estado_contratacion(e){
         e.preventDefault();
@@ -183,7 +191,7 @@ function Panel_usuario(){
         }
       
         return (
-          <div className="bg-gray-500 w-full h-full flex flex-row  ">
+          <div className="bg-gray-500 w-full h-full  ">
               {/*Formulario Creacion Usuario  */}
             <Form
             className="min-w-1/3 max-w-1/2  h-full flex flex-col gap-4 bg-white"
@@ -464,6 +472,31 @@ function Panel_usuario(){
             </Form>
             </div>
 
+                <button
+                onClick={traerListaUsuarios}>Traer Usuarios</button>
+
+                <table className="bg-white border-2">
+                  <thead>
+                    <tr>
+                      <th className="border-2">Nombre Completo</th>
+                      <th className="border-2">Cedula</th>
+                      <th className="border-2">Usuario</th>
+                      <th className="border-2">Contraseña</th>
+                      <th className="border-2">Firmó</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  {lista_usuarios.map((usuario)=>(
+                    <tr>
+                      <td className="border-2 text-center" key="1">{usuario[0]}</td>
+                      <td className="border-2 text-center" key="2">{usuario[1]}</td>
+                      <td className="border-2 text-center" key="3">{usuario[2]}</td>
+                      <td className="border-2 text-center" key="4">{usuario[3]}</td>
+                      <td className="border-2 text-center" key="5">{usuario[4] ==0? 'No':'Si'}</td>
+                    </tr>
+                  ))}
+                  </tbody>
+                </table>
             </div>
 
             </div>

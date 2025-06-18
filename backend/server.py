@@ -365,7 +365,13 @@ def upload_file():
     errores = []
     lista_archivos =[i for i in archivos.items()]
     print(lista_archivos[-1])
-    if estado_usuario ==2 and not 'Firma' in lista_archivos[-1]:
+    conexion = obtener_conexion_bd()
+    cursor= conexion.cursor()
+    cursor.execute("select estado_firma from usuarios where id=%s",(id_usuario,))
+    respuesta =  cursor.fetchone()[0]
+    cursor.close()
+    conexion.close()
+    if estado_usuario ==2 and not 'Firma' in lista_archivos[-1] and respuesta!=1:
         return jsonify({"mensaje":"La firma es obligatoria"})
 
     for nombre_archivo, archivo in archivos.items():
@@ -444,7 +450,7 @@ def upload_file():
 
         #si no ah firmado
         if res[0] == 0 or res[0]== None:
-            from firma_fomatos.firma_documentos import Firma_documentos
+            from .firma_fomatos.firma_documentos import Firma_documentos
             firma =Firma_documentos(nombre_completo,direccion,cedula,correo_electronico,telefono,area,cargo,tipo_sangre,fecha_nacimiento, ruta_carpeta_persona, ruta_firma)
             print("entro al estado firma")
             print(type(cargo_id))
@@ -522,5 +528,23 @@ def obtener_aceptacion_tratamiento_datos():
     if not cursor.fetchone():
         return jsonify({"acepta":False}),200
     return jsonify({"acepta":True}),200
+
+@app.route("/traer_todos_usuarios",methods=["GET"])
+def obtener_todos_usuario():
+    try:
+        conexion = obtener_conexion_bd()
+        cursor =conexion.cursor()
+        cursor.execute("select concat_ws(' ',primer_nombre,primer_apellido) nombre_completo, cedula_ciudadania, nombre_usuario, contraseña_usuario, estado_firma from usuarios")
+        res=cursor.fetchall()
+        print(res)
+        cursor.close()
+        conexion.close()
+        return jsonify({"mensaje":"Fetch Exitoso"
+                        ,"usuarios":res}),200
+    except Exception as e:
+        cursor.close()
+        conexion.close()
+        return jsonify({"mensaje":f"Error en el metodo{e}"}),400
+
 if __name__ == '__main__':  
     app.run(debug=True,  host= '0.0.0.0' ,port=5009)
