@@ -1,3 +1,4 @@
+drop database if exists try_contratacion;
 create database try_contratacion;
 use try_contratacion;
 
@@ -17,6 +18,9 @@ create table tipos_sangre(id int  PRIMARY Key,
                             tipo varchar(20)
                             );    
 
+create table empresas(id int primary key,
+                        empresa varchar(50)
+                        );
 
 create table usuarios (id int AUTO_INCREMENT PRIMARY KEY,
                      primer_nombre varchar(20)not null,
@@ -32,11 +36,15 @@ create table usuarios (id int AUTO_INCREMENT PRIMARY KEY,
                      ruta_firma varchar(400),
                      nombre_usuario varchar(50),
                      contraseña_usuario varchar(50),
+                     empresa_id int,
                      fecha_nacimiento DATE,
                      estado_firma int,
+                     Foreign Key (empresa_id) references empresas(id),
                      FOREIGN Key (cargo_id) references cargos(id),
                      Foreign Key (tipo_sangre_id) references tipos_sangre(id)
                       );
+
+
 
 create table documentos(id INT  PRIMARY KEY,
                        documento varchar(100)
@@ -139,7 +147,7 @@ INSERT INTO documentosxcargoxestado (cargo_id,documento_id,estado_id) VALUES
 (11,1,2),(11,2,2),(11,3,2),(11,4,2),(11,5,2),(11,6,2),(11,7,2),(11,8,2),(11,9,2),(11,10,2),(11,11,2),(11,12,2),(11,13,2),(11,14,2),(11,15,2),(11,16,2),(11,17,2),(11,18,2),(11,19,2),(11,20,2),(11,21,2),(11,22,2),
 (11,23,2),(11,25,2),(11,26,2),(11,27,2),(11,28,2),(11,29,2),(11,32,2),(11,33,2),(11,34,2);
 
-
+INSERT INTO empresas (id,empresa) values (1, "IPS TID"),(2,"SU ASESORIA");
 INSERT INTO usuarios(id,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,direccion_residencia,cedula_ciudadania,
 correo_electronico,cargo_id,tipo_sangre_id,telefono,ruta_firma,nombre_usuario,contraseña_usuario,fecha_nacimiento,estado_firma) 
 VALUES (NULL, 'Fabian', NULL, 'Marquez', 'TID', 'cl 88 # 99-33', '5558796', 'ipstid@ipstid.com', '4', '2', '35500088', NULL, 'Fabi', '0', NULL, NULL);

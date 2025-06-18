@@ -53,6 +53,8 @@ function Panel_usuario(){
       const [fecha_nacimiento, set_fecha_nacimiento] = useState();
       const [valido, setValido] = useState()
       const [aceptoPolitica, setAceptoPolitica] = useState();
+
+      const [empresa,set_empresa] = useState()
       
     useEffect(()=>{
         fetch(uri_flask+"/comprobacion")
@@ -112,6 +114,7 @@ function Panel_usuario(){
                      datos["cargo_seleccionado"] = cargo_seleccionado;
                      datos["tipo_sangre_seleccionado"] =tipo_sangre_seleccionado
                      datos["fecha_nacimiento"] = fecha_nacimiento
+                     datos["empresa"] = empresa
                  
                      // Enviar datos aquí directamente si necesitas
                      console.log("Datos a enviar:", datos);
@@ -141,7 +144,6 @@ function Panel_usuario(){
         .then(response=>response.json())
         .then(data =>{set_lista_usuarios(data.usuarios);console.log(data.usuarios)})
         .catch(error=> console.log(error));
-        console.log(lista_usuarios)
         
       }
     
@@ -263,6 +265,19 @@ function Panel_usuario(){
             name="Correo_electronico"
             placeholder="Correo Electronico"
             type="text"/>
+
+             {/* Empresa */}
+            <Select
+            className="border-2 mb-2"
+            isRequired
+            label="Empresa"
+            labelPlacement="outside"
+            name="empresa"
+            placeholder="Seleccione Empresa"
+            onSelectionChange={set_empresa}>
+              <SelectItem className="bg-white w-1/2  border-2" key="1">IPS TID</SelectItem>
+              <SelectItem className="bg-white w-1/2  border-2" key="2">SU ASESORIA</SelectItem>
+            </Select>
             
             {/* CARGO */}         
             <Select
@@ -482,6 +497,7 @@ function Panel_usuario(){
                       <th className="border-2">Cedula</th>
                       <th className="border-2">Usuario</th>
                       <th className="border-2">Contraseña</th>
+                      <th className="border-2">Empresa</th>
                       <th className="border-2">Firmó</th>
                     </tr>
                   </thead>
@@ -492,7 +508,8 @@ function Panel_usuario(){
                       <td className="border-2 text-center" key="2">{usuario[1]}</td>
                       <td className="border-2 text-center" key="3">{usuario[2]}</td>
                       <td className="border-2 text-center" key="4">{usuario[3]}</td>
-                      <td className="border-2 text-center" key="5">{usuario[4] ==0? 'No':'Si'}</td>
+                      <td className="border-2 text-center" key="4">{usuario[4]}</td>
+                      <td className="border-2 text-center" key="5">{usuario[5] ==0? 'No':'Si'}</td>
                     </tr>
                   ))}
                   </tbody>

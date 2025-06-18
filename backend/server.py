@@ -146,6 +146,7 @@ def crear_usuario():
     Contraseña_usuario = informacion.get("Contraseña_usuario")
     cargo_seleccionado_id = informacion.get("cargo_seleccionado") 
     tipo_sangre_seleccionado_id = informacion.get("tipo_sangre_seleccionado") 
+    empresa_id = informacion.get("empresa")
     dia_nacimiento = informacion.get("fecha_nacimiento")["day"]
     mes_nacimiento = informacion.get("fecha_nacimiento")["month"]
     año_nacimiento = informacion.get("fecha_nacimiento")["year"]
@@ -160,15 +161,15 @@ def crear_usuario():
         cursor.execute("""INSERT INTO usuarios
                        (id,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,
                         direccion_residencia,cedula_ciudadania,correo_electronico,
-                        cargo_id,tipo_sangre_id,telefono,ruta_firma,nombre_usuario,contraseña_usuario,fecha_nacimiento,estado_firma) 
+                        cargo_id,tipo_sangre_id,telefono,ruta_firma,nombre_usuario,contraseña_usuario,empresa_id,fecha_nacimiento,estado_firma) 
                         VALUES
                         (%s,%s,%s,%s,%s,
                             %s,%s,%s,
                             %s,%s,%s,%s,
-                            %s,%s,%s,%s);""",(None,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,
+                            %s,%s,%s,%s,%s);""",(None,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,
                                          direccion,cedula,correo,
                                          cargo_seleccionado_id,tipo_sangre_seleccionado_id,telefono,None,
-                                         Nombre_usuario,Contraseña_usuario,fecha_nacimiento,0 ))
+                                         Nombre_usuario,Contraseña_usuario,empresa_id,fecha_nacimiento,0 ))
         conexion.commit()
         cursor.execute("select id from usuarios where cedula_ciudadania =%s",(cedula,))
         id_usuario = cursor.fetchone()
@@ -391,12 +392,20 @@ def upload_file():
         if nombre_archivo == 'Firma' and tipo_archivo == 'pdf':
             return jsonify({"mensaje":"La firma no puede ser formatyo PDF, DEBE SER IMAGEN"})
        
-        
+        conexion = obtener_conexion_bd()
+        cursor = conexion.cursor()
+        cursor.execute("""select empresas.empresa 
+                       from usuarios
+                       INNER JOIN empresas on empresas.id = usuarios.empresa_id
+                       where usuarios.id=%s""",(id_usuario,))
+        empresa_usuario = cursor.fetchone()[0]
+        cursor.close()
+        conexion.close()
         ruta_carpeta_script = os.path.dirname(__file__)
-        ruta_carpeta_archivos = os.path.join(ruta_carpeta_script,"archivos")
+        ruta_carpeta_empresa = os.path.join(ruta_carpeta_script,empresa_usuario)
         
-        os.makedirs(fr"{ruta_carpeta_archivos}\{area}\{cargo}\{nombre_completo}", exist_ok=True)
-        ruta_carpeta_persona  = os.path.abspath(os.path.join(ruta_carpeta_archivos,area,cargo,nombre_completo))
+        os.makedirs(fr"{ruta_carpeta_empresa}\{nombre_completo}", exist_ok=True)
+        ruta_carpeta_persona  = os.path.abspath(os.path.join(ruta_carpeta_empresa,nombre_completo))
         print(ruta_carpeta_persona)
         ruta_archivo_bucle= fr"{ruta_carpeta_persona}\{nombre_archivo}.{tipo_archivo}" 
         
@@ -534,7 +543,11 @@ def obtener_todos_usuario():
     try:
         conexion = obtener_conexion_bd()
         cursor =conexion.cursor()
-        cursor.execute("select concat_ws(' ',primer_nombre,primer_apellido) nombre_completo, cedula_ciudadania, nombre_usuario, contraseña_usuario, estado_firma from usuarios")
+        cursor.execute("""select 
+                       concat_ws(' ',primer_nombre,primer_apellido) nombre_completo
+                       , cedula_ciudadania, nombre_usuario, contraseña_usuario,empresas.empresa,estado_firma
+                        from usuarios
+                       INNER JOIN empresas on empresas.id=usuarios.empresa_id""")
         res=cursor.fetchall()
         print(res)
         cursor.close()
