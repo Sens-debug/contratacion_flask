@@ -1,6 +1,8 @@
 # Flask
 venv 
 backend/archivos/*
+backend/IPS TID/*
+backend/SU ASESORIA/*
 backend/firma_formatos/__pycache__
 
 
