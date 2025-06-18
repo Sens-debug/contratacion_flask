@@ -1,11 +1,9 @@
 import React,{ useEffect, useState } from "react";
 import {  data, useLocation, useNavigate} from "react-router-dom";
 import "../index.css"
-import { Form } from "@heroui/form";
-import {Button} from "@heroui/button"
-import {Input} from "@heroui/input"
-import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DateInputField} from "@heroui/react";
-import {DateInput} from "@heroui/react";
+
+import {DateInput,Form,Button,Input,Select,SelectItem} from "@heroui/react";
+import {Dropdown,DropdownItem,DropdownMenu,DropdownTrigger} from "@heroui/react";
 
 
 
@@ -94,11 +92,7 @@ function Panel_usuario(){
 
         }
     },[]);
-      if (valido==false){
-        return(
-          <h1 className=" text-red-600 bg-white text-center">ERROR</h1>
-        )
-      }
+      
         console.log(documentos_necesarios)
         console.log(usuarios_en_sistema)
         console.log(estados_contratacion)
@@ -189,10 +183,10 @@ function Panel_usuario(){
         }
       
         return (
-            <div className="bg-gray-500 w-full  h-full flex flex-row  ">
-              
+          <div className="bg-gray-500 w-full h-full flex flex-row  ">
+              {/*Formulario Creacion Usuario  */}
             <Form
-            className="w-1/2 max-w-xs  h-full flex flex-col gap-4 bg-white"
+            className="min-w-1/3 max-w-1/2  h-full flex flex-col gap-4 bg-white"
             onSubmit={envio_creacion_usuario}>
                 <h1 className="text-center bg-gray-300 font-medium">Creacion Usuario</h1>
                 <Input
@@ -262,62 +256,48 @@ function Panel_usuario(){
             placeholder="Correo Electronico"
             type="text"/>
             
-            {/* CARGO */}
-            <Dropdown >
-              <DropdownTrigger>
-                <Button className="capitalize bg-blue-500 text-white rounded-md hover:bg-blue-900 transition" variant="bordered">
-                  {cargo_seleccionado}
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu className="bg-gray-800  text-white border-2 border-black"
-                disallowEmptySelection
-                aria-label="Multiple selection example"
-                closeOnSelect={true}
-                selectedKeys={cargos_a_elegir}
-                selectionMode="single"
-                variant="flat"
-                onSelectionChange={set_cargos_a_elegir}
-              >
-                <DropdownItem key="1">Antibiotico</DropdownItem>
-                <DropdownItem key="2">Cuidador</DropdownItem>
-                <DropdownItem key="3">Permanente</DropdownItem>
-                <DropdownItem key="4">AuditorContratacion</DropdownItem>
-                <DropdownItem key="5">Nutricionista</DropdownItem>
-                <DropdownItem key="6">Psicologo</DropdownItem>
-                <DropdownItem key="7">Terapeuta Fisico</DropdownItem>
-                <DropdownItem key="8">Terapeuta Ocupacional</DropdownItem>
-                <DropdownItem key="9">Terapeuta Respiratorio</DropdownItem>
-                <DropdownItem key="10">Fonoaudiologo</DropdownItem>
-                <DropdownItem key="11">Medico General</DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
+            {/* CARGO */}         
+            <Select
+            className="border-2 mb-2 overflow-y-auto"
+            isRequired
+            label="Cargo"
+            labelPlacement="outside"
+            placeholder="Seleccione Cargo"
+            name = "cargo"
+            onSelectionChange={set_cargos_a_elegir}
+            >
+              <SelectItem className="bg-white  border-2" key="1">Antibiotico</SelectItem>
+              <SelectItem className="bg-white  border-2" key ="2">Cuidador</SelectItem>
+              <SelectItem className="bg-white  border-2" key="3">Permanente</SelectItem>
+              <SelectItem className="bg-white  border-2" key="4">AuditorContatacion</SelectItem>
+              <SelectItem className="bg-white  border-2" key="5">Nutricionista</SelectItem>
+              <SelectItem className="bg-white  border-2" key="6">Psicologo</SelectItem>
+              <SelectItem className="bg-white  border-2" key="7">Terapeuta Fisico</SelectItem>
+              <SelectItem className="bg-white  border-2" key="8">Terapeuta Ocupacional</SelectItem>
+              <SelectItem className="bg-white  border-2" key="9">Terapeuta Respiratorio</SelectItem>
+              <SelectItem className="bg-white  border-2" key="10">Fonoaudiologo</SelectItem>
+              <SelectItem className="bg-white  border-2" key="11">Medico General</SelectItem>
+
+            </Select>
             
             {/* TIPO SANGRE */}
-            <Dropdown >
-              <DropdownTrigger>
-                <Button className="capitalize bg-blue-500 text-white rounded-md hover:bg-blue-900 transition" variant="bordered">
-                  {tipo_sangre_seleccionado}
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu className="bg-gray-900  border-2 border-black text-white"
-                disallowEmptySelection
-                aria-label="Multiple selection example"
-                closeOnSelect={true}
-                selectedKeys={tipos_sangre_a_elegir}
-                selectionMode="single"
-                variant="flat"
-                onSelectionChange={set_tipos_sangre_a_elegir}
-              >
-                <DropdownItem key="1">0-</DropdownItem>
-                <DropdownItem key="2">0+</DropdownItem>
-                <DropdownItem key="3">A-</DropdownItem>
-                <DropdownItem key="4">A+</DropdownItem>
-                <DropdownItem key="5">B-</DropdownItem>
-                <DropdownItem key="6">B+</DropdownItem>
-                <DropdownItem key="7">AB-</DropdownItem>
-                <DropdownItem key="8">AB+</DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
+            <Select
+            className="border-2 mb-2"
+            isRequired
+            label="Tipo de Sangre"
+            labelPlacement="outside"
+            name="tipo_sangre"
+            placeholder="Seleccione Tipo Sangre"
+            onSelectionChange={set_tipos_sangre_a_elegir}>
+              <SelectItem className="bg-white w-1/2  border-2" key="1">0-</SelectItem>
+              <SelectItem className="bg-white w-1/2  border-2" key="2">0+</SelectItem>
+              <SelectItem className="bg-white w-1/2  border-2" key="3">A-</SelectItem>
+              <SelectItem className="bg-white w-1/2  border-2" key="4">A+</SelectItem>
+              <SelectItem className="bg-white w-1/2  border-2" key="5">B-</SelectItem>
+              <SelectItem className="bg-white w-1/2  border-2" key="6">B+</SelectItem>
+              <SelectItem className="bg-white w-1/2  border-2" key="7">AB-</SelectItem>
+              <SelectItem className="bg-white w-1/2  border-2" key="8">AB+</SelectItem>
+            </Select>
             
             <Input
             className="mt-1 border-2 rounded-md bg-gray-200 border-black shadow-sm focus:ring-blue-500 focus:border-blue-500"
@@ -369,69 +349,51 @@ function Panel_usuario(){
              <p className="bg-gray-300 font-medium text-center">{mensaje_back}</p>
 
             </Form>
+          <div className="px-10 "></div>
 
-            <div className="px-10 "></div>
-
-            <div className="w-1/2 max-w-m flex flex-col rounded-sm">
+            <div className="min-w-2/3 max-w-full flex flex-col rounded-sm">
                 <div className=" w-1/2 max-w-xs border-2 border-black " >
                       {/* Actualizar Estado Contratacion */}
-                      <Form className="bg-white w-full max-w-xs flex flex-col px-4"
+                      <Form className="bg-white min-w-full max-w-1/2 flex flex-col px-4"
                       onSubmit={actualizar_estado_contratacion}
                       >      
                       <h1 className="bg-gray-300 w-full text-center font-medium">Actualizar Estado Contratacion</h1>
 
                       {/* Seleccionar ID usuario */}
-                      <Dropdown>
-                          <DropdownTrigger>
-                            <Button className="capitalize rounded-xl border-2 border-black  bg-blue-500 hover:bg-blue-900 transition py-4" variant="bordered">
-                              {usuario_seleccionado}
-                            </Button>
-                          </DropdownTrigger>
-                          <DropdownMenu
-                            className=" border-2 border-black"
-                            disallowEmptySelection
-                            aria-label="Single selection example"
-                            selectedKeys={usuarios_a_seleccionar}
-                            selectionMode="single"
-                            variant="flat"
-                            onSelectionChange={set_usuario_a_seleccionar}
-                          >
-                            {usuarios_en_sistema.map((item)=> (
-                            <DropdownItem className="w-full bg-black text-white border-2 border-white"
-                            key={item[0]}>{item[1]}-{item[2]}_{item[3]}</DropdownItem>
-                            
-                            
-                            ))}
+                      <Select
+                      className="border-2 mb-2"
+                      isRequired
+                      label="Usuario"
+                      labelPlacement="outside"
+                      name="id_usuario"
+                      placeholder="Seleccione Usuario"
+                      selectedKeys={[usuario_seleccionado]}
+                      onSelectionChange={set_usuario_a_seleccionar}
+                      >
+                        {usuarios_en_sistema.map((item)=>(
+                          <SelectItem 
+                          className="bg-white border-2  overflow-y-auto" 
+                          key={item[0]}
+                          textValue={item[1]+ "  "+item[2]+" CC"+item[3]}>
+                            {item[1]} {item[2]} CC{item[3]}
+                            </SelectItem>
+                        ))}
 
-                          </DropdownMenu>
-                      </Dropdown>
+                      </Select>
                           
-                      {/* Seleccionar estado de contratacion */}
-                      <Dropdown>
-                          <DropdownTrigger>
-                            <Button className="capitalize rounded-xl border-2 border-black  bg-blue-500 hover:bg-blue-900 transition py-4" variant="bordered">
-                              {estado_seleccionado}
-                            </Button>
-                          </DropdownTrigger>
-                          <DropdownMenu
-                            className=" border-2 border-black"
-                            disallowEmptySelection
-                            aria-label="Single selection example"
-                            selectedKeys={estados_a_seleccionar}
-                            selectionMode="single"
-                            variant="flat"
-                            onSelectionChange={set_estados_a_seleccionar}
-                          >
-                            {estados_contratacion.map((item)=> (
-                            <DropdownItem className="w-full bg-black text-white border-2 border-white"
-                            key={item[0]}>{item[1]}</DropdownItem>
-                            
-                            
-                            ))}
-
-                          </DropdownMenu>
-                      </Dropdown>
-                          
+                      {/* Seleccionar estado de contratacion */}                          
+                        <Select
+                        className="border-2 mb-2 "
+                        isRequired
+                        label="Seleccione Estado Contratacion"
+                        labelPlacement="outside"
+                        onSelectionChange={set_estados_a_seleccionar}
+                        >
+                          {estados_contratacion.map((item)=>(
+                            <SelectItem className="bg-white border-2 capitalize" key={item[0]}
+                            textValue={item[1]}>{item[1]}</SelectItem>
+                          ))}
+                        </Select>
                       <div  className="flex gap-2 border-2  text-white bg-blue-400 rounded-md hover:bg-blue-900 transition
                       py-2  px-2">
                           <Button
@@ -454,54 +416,40 @@ function Panel_usuario(){
             >
               <h1 className="w-full bg-gray-300 font-medium text-center">Establecer Estado de la Firma</h1>
               
-               <Dropdown>
-                <DropdownTrigger>
-                  <Button className="capitalize rounded-xl border-2 border-black  bg-blue-500 hover:bg-blue-900 transition py-4" variant="bordered">
-                    {usuario_seleccionado}
-                  </Button>
-                </DropdownTrigger>
-                <DropdownMenu
-                  className=" border-2 border-black"
-                  disallowEmptySelection
-                  aria-label="Single selection example"
-                  selectedKeys={usuarios_a_seleccionar}
-                  selectionMode="single"
-                  variant="flat"
-                  onSelectionChange={set_usuario_a_seleccionar}
-                >
-                  {usuarios_en_sistema.map((item)=> (
-                  <DropdownItem className="w-full bg-black text-white border-2 border-white"
-                  key={item[0]}>{item[1]}-{item[2]}_{item[3]}</DropdownItem>
-                  ))}
-                  
-                </DropdownMenu>
-            </Dropdown>
+              {/* Seleccionar ID usuario */}
+              <Select
+              className="border-2 mb-2"
+              isRequired
+              label="Usuario"
+              labelPlacement="outside"
+              name="id_usuario"
+              placeholder="Seleccione Usuario"
+              selectedKeys={[usuario_seleccionado]}
+              onSelectionChange={set_usuario_a_seleccionar}
+              >
+                {usuarios_en_sistema.map((item)=>(
+                  <SelectItem 
+                  className="bg-white border-2  overflow-y-auto" 
+                  key={item[0]}
+                  textValue={item[1]+ "  "+item[2]+" CC"+item[3]}>
+                    {item[1]} {item[2]} CC{item[3]}
+                    </SelectItem>
+                ))}
+                
+              </Select>
 
               {/* Estado Firma */}
-              <Dropdown>
-                <DropdownTrigger>
-                  <Button className="capitalize rounded-xl border-2 border-black  bg-blue-500 hover:bg-blue-900 transition py-4" variant="bordered">
-                    {estado_firma_seleccionado}
-                  </Button>
-                </DropdownTrigger>
-                <DropdownMenu
-                  className=" border-2 border-black"
-                  disallowEmptySelection
-                  aria-label="Single selection example"
-                  selectedKeys={estado_firma_a_elegir}
-                  selectionMode="single"
-                  variant="flat"
-                  onSelectionChange={set_estado_firma_a_elegir}
-                >
-                  
-                  <DropdownItem className="w-full bg-black text-white border-2 border-white"
-                  key='0'>Disponible para Firma</DropdownItem>
-
-                  <DropdownItem className="w-full bg-black text-white border-2 border-white"
-                  key='1'>No Disponible para Firma</DropdownItem>                  
-                  
-                </DropdownMenu>
-            </Dropdown>
+            <Select
+            className="border-2 mb-2"
+            isRequired
+            label="Seleccione el Estado de Firma"
+            labelPlacement="outside"
+            name = "estado_firma"
+            placeholder="---"
+            onSelectionChange={set_estado_firma_a_elegir}>
+              <SelectItem  className=" bg-white border-2 overflow-y-auto" key="0">Disponible Para La firma</SelectItem>
+              <SelectItem  className=" bg-white border-2 overflow-y-auto" key="1">No Disponible Para La firma</SelectItem>
+            </Select>
               
             <div className="flex gap-2 border-2  text-white bg-blue-400 rounded-md hover:bg-blue-900 transition
             py-2  px-2">
