@@ -6,4 +6,5 @@ def configure_jwt(app):
     app.config['JWT_COOKIE_SECURE']=False
     app.config['JWT_COOKIE_HTTPONLY']=True
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=30)
-    app.config['JWT_COOKIE_SAMESITE']= None
+    app.config['JWT_COOKIE_SAMESITE']= 'Lax'
+    app.config['JWT_COOKIE_CSRF_PROTECT'] = True

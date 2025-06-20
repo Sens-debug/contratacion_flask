@@ -33,7 +33,7 @@ class ConexionContratacion(mysql.connector.MySQLConnection):
         Recibe Usuario y Contraseña'''
         try:
             with self.cursor(dictionary=True) as cursor:
-                cursor.execute("select id from usuarios where nombre_usuario =%s and contraseña_usuario= %s",
+                cursor.execute("select id,cargo_id from usuarios where nombre_usuario =%s and contraseña_usuario= %s",
                                (usuario,contraseña)
                                )
                 resultados = cursor.fetchall()
@@ -49,8 +49,49 @@ class ConexionContratacion(mysql.connector.MySQLConnection):
 
     @revisar_conexion
     def traer_todo(self):
-        with self.cursor(dictionary=True) as cursor:
+         with self.cursor(dictionary=True) as cursor:
             cursor.execute("select * from usuarios")
             datos = cursor.fetchall()
             cursor.close()
-            return datos
+            return datos   
+
+    @revisar_conexion
+    def crear_usuario(self,l_nombres,l_credenciales,fecha_nacimiento_completa,direccion,cedula,correo,telefono,cargo_id,tipo_sangre_seleccionado_id,empresa_id):
+        try:
+            with self.cursor() as cursor:
+                cursor.execute("""INSERT INTO usuarios
+                               (id,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,
+                                direccion_residencia,cedula_ciudadania,correo_electronico,
+                                cargo_id,tipo_sangre_id,telefono,ruta_firma,nombre_usuario,contraseña_usuario,empresa_id,fecha_nacimiento,estado_firma) 
+                                VALUES
+                                (%s,%s,%s,%s,%s,
+                                    %s,%s,%s,
+                                    %s,%s,%s,%s,
+                                    %s,%s,%s,%s,%s);""",(None,l_nombres[0],l_nombres[1],l_nombres[2],l_nombres[3],
+                                                 direccion,cedula,correo,
+                                                 cargo_id,tipo_sangre_seleccionado_id,telefono,None,
+                                                 l_credenciales[0],l_credenciales[1],empresa_id,fecha_nacimiento_completa,0 ))
+                self.commit()
+                cursor.execute("select id from usuarios where cedula_ciudadania =%s",(cedula,))
+                id_usuario = cursor.fetchone()
+                cursor.execute("""INSERT INTO usuariosxestado (id_usuario,estado_id) VALUES (%s,%s)""",(id_usuario[0],1))
+                self.commit()
+                cursor.close()
+                return "Usuario Creado Exitosamente"
+        except Exception as e:
+            cursor.close()
+            return "Error en la creacion de Usuario"
+
+    @revisar_conexion
+    def obtener_cargo_x_id(self,id):
+        '''Devuelve String y Boolean\n
+        String es el (Cargo_Id o Error) y Boolean es el SaaS'''
+        try:
+            with self.cursor() as cursor:
+                cursor.execute("select cargo_id from usuarios where id=%s",(id,))
+                data = cursor.fetchall[0][0]
+                cursor.close()
+                return data
+        except Exception as e:
+            cursor.close()
+            return e

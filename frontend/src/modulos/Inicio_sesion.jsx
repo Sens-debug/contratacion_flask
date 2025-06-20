@@ -12,69 +12,43 @@ export function Formulario_login(){
     //Con este hook manejamos la navegacion por el sistema
     const navegacion = useNavigate();
     const uri_flask = import.meta.env.VITE_URL_SERVIDOR
-    const [valido, setValido] = useState()
-
-    useEffect(()=> {
-        fetch(uri_flask+"/comprobacion").then(response => response.json()).then(data => setValido(data.estado) )
-    },[])
-
 
     //Creamos una funcion que nos haga el manejo de envio de datos desde ellogin hasta el backend
-    const manejarEnvio =(variableControl) => {
+    const manejarEnvio = async(variableControl) => {
         variableControl.preventDefault();
-        //Hace un fetch a la url del backend
-        fetch(uri_flask+'/inicio_sesion',{
-            //Especifica el metodo del fetch 'post'
+       try{
+        const response = await fetch(uri_flask+'/login',{ 
             method: 'POST',
-            //Marca que se va a enviar un formato JSON
+            credentials:'include',//esto es crítico para que las cookies se envíen y reciban
             headers:{
                 'Content-Type':'application/json'
-            },
-            //Especificamos el JSON a enviar
+            },     
             body: JSON.stringify({"usuario":usuario, "contraseña":contraseña}),
-        })
-        //Esta es la respuesta del servidor
-        .then(respuesta => respuesta.json())
-        
-        //luego incrustamos en el estado mensaje, el valor de la clave estado en el return del server
-        .then(data =>{setMensaje(data.estado)
-            //Condicional ternario que verifica si el login fue exitoso, posterior a eso envia la data del fetch a traves de stados de React
-            data.estado=='aprobado'?navegacion('/app',{state:{"datos":data}}):''
-        })
-        //Manejamos cualquier posible error en el fetch
-        .catch(error => {
+        });       
+        const data = await response.json()
+        setMensaje(data.mensaje)
+        setTimeout(()=>{
+            if (data.cargo_id==4){ navegacion('/panel_admin')}
+        },0)     
+        } catch(error) {
             console.error('ERROR:', error)
-            setMensaje('Ocurrio un error durante el fetch')
-        });
+            setMensaje('Ocurrio un error durante el fetch');
+        };
     };
-        if (valido== false){
-            return <h1 className=" text-red-600 bg-white text-center">ERROR</h1>
-        }
+       
 
         return(
-            <div className=" bg-gray-700 justify-center min-h-screen flex items-center">
-                
-
+            <div className=" bg-gray-700 justify-center min-h-screen flex items-center">               
                 <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md flex items-center">
-                
-                {/* Creamos la etiqueta Formulario donde crearemos toda la estructura del mismo */}
                 <form onSubmit={manejarEnvio}className="space-y-4 ">
-                {/* Div del usuario */}
                 <div>
-                    {/* Creamos la etiqueta Usuario del formulario */}
                     <label className="block text-black font-medium" >Usuario:</label>
-                    {/* Creamos un input y asiganos sus valores clave
-                    -tipo-
-                    -valor{muestra el valor actual contenido en la variable citada}
-                    -onchange-{'actualiza el estado cuando el usuario escribe (on change)
-                    -requerido : Especifica campo obligatorio} */}
                     <input type="text"
                     className="mt-1 block rounded-md bg-gray-200 border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     value={usuario}
                     onChange={(e)=> setUsuario(e.target.value)} 
                     required/>
                 </div>
-                {/* DIV de la contraseña */}
                 <div>
                     <label className="block text-black font-medium">Contraseña:</label>
                     <input type="password"
@@ -87,7 +61,6 @@ export function Formulario_login(){
                 <button className="w-full bg-blue-700 text-white py-2 px-4 rounded-md hover:bg-blue-900 transition" type="submit">Ingresar</button>
                 <p className="text-m">{mensaje}</p>
                 </form>
-                
                 </div>
             </div>
             

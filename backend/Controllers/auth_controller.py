@@ -17,6 +17,8 @@ def login():
                         "boolean":saas})
     print(data.get("id"))
     token = create_access_token(identity=str(data.get("id")))
-    respuesta =jsonify({"mensaje":"login exitoso"})
+    respuesta =jsonify({"mensaje":"login exitoso",
+                        "loguea":loguea,
+                        })
     set_access_cookies(respuesta,token)
     return respuesta
