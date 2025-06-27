@@ -145,8 +145,10 @@ def crear_usuario():
     Nombre_usuario = informacion.get("Nombre_Usuario")
     Contraseña_usuario = informacion.get("Contraseña_usuario")
     cargo_seleccionado_id = informacion.get("cargo_seleccionado") 
-    tipo_sangre_seleccionado_id = informacion.get("tipo_sangre_seleccionado") 
+    tipo_sangre_seleccionado_id = informacion.get("tipo_sangre_seleccionado")
+    print(informacion.get("empresa"))
     empresa_id = informacion.get("empresa")
+    print(empresa_id)
     dia_nacimiento = informacion.get("fecha_nacimiento")["day"]
     mes_nacimiento = informacion.get("fecha_nacimiento")["month"]
     año_nacimiento = informacion.get("fecha_nacimiento")["year"]

@@ -11,7 +11,7 @@ export function Formulario_login(){
     const [mensaje, setMensaje] = useState('');
     //Con este hook manejamos la navegacion por el sistema
     const navegacion = useNavigate();
-    const uri_flask = import.meta.env.VITE_URL_SERVIDOR
+    const uri_flask =import.meta.env.VITE_URL_SERVIDOR
 
     //Creamos una funcion que nos haga el manejo de envio de datos desde ellogin hasta el backend
    const manejarEnvio =(variableControl) => {

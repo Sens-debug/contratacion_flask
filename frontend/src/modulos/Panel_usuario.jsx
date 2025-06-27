@@ -12,11 +12,12 @@ function Panel_usuario(){
     const datos = location.state||{}; //<-- Acá accedo al state del anterior, pero no puedo trabajar bien con él
     const datos_recibidos_login = datos.datos || {};  // <--- acá extraigo "datos"
     //ESTE ESTADO ES PARA MANEJAR LOS ARCHIVOS QUE VAMOS A ENVIAR
-    console.log(datos_recibidos_login)
+    // (datos_recibidos_login)
+    const uri_flask =import.meta.env.VITE_URL_SERVIDOR
     const [archivo, setArchivo] = useState({})
     const [estado_subida, set_estado_subida] = useState('')
     const navegacion = useNavigate();
-    const uri_flask = import.meta.env.VITE_URL_SERVIDOR
+   
     const [documentos_necesarios, set_documentos_necesarios]= useState([])
     const [usuarios_en_sistema, set_usuarios_en_sistema] = useState([])
     const [estados_contratacion, set_estados_contratacion] = useState([])
@@ -51,10 +52,12 @@ function Panel_usuario(){
       const [cedula_a_buscar, set_cedula_a_buscar] = useState("");
 
       const [fecha_nacimiento, set_fecha_nacimiento] = useState();
-      const [valido, setValido] = useState()
+      const [valido, setValido] = useState();
       const [aceptoPolitica, setAceptoPolitica] = useState();
-
-      const [empresa,set_empresa] = useState()
+      const [empresa_s, set_empresa] = useState([]);
+      const empresaSeleccionada = React.useMemo(
+      () => Array.from(empresa_s).join(", ").replaceAll("_", " "),
+      [empresa_s],);
       
     useEffect(()=>{
         fetch(uri_flask+"/comprobacion")
@@ -85,19 +88,19 @@ function Panel_usuario(){
         fetch(uri_flask+'/obtener_usuarios')
         .then( response => response.json())
         .then(data => set_usuarios_en_sistema(data.usuarios))
-        .catch(error=> console.log("error"+error))
+        .catch(error=> ("error"+error))
         
         fetch(uri_flask+'/obtener_estados_contratacion')
         .then(response=> response.json())
         .then(data => set_estados_contratacion(data.estados))
-        .catch(error=> console.log("error"+error))
+        .catch(error=> ("error"+error))
 
         }
     },[]);
       
-        console.log(documentos_necesarios)
-        console.log(usuarios_en_sistema)
-        console.log(estados_contratacion)
+        // (documentos_necesarios)
+        // (usuarios_en_sistema)
+        // (estados_contratacion)
 
     function cerrar_sesion(){
         navegacion("/")
@@ -112,12 +115,12 @@ function Panel_usuario(){
                  
                      const datos = Object.fromEntries(new FormData(e.currentTarget));
                      datos["cargo_seleccionado"] = cargo_seleccionado;
-                     datos["tipo_sangre_seleccionado"] =tipo_sangre_seleccionado
-                     datos["fecha_nacimiento"] = fecha_nacimiento
-                     datos["empresa"] = empresa
+                     datos["tipo_sangre_seleccionado"] =tipo_sangre_seleccionado;
+                     datos["fecha_nacimiento"] = fecha_nacimiento;
+                     datos["empresa"] = empresaSeleccionada;
                  
                      // Enviar datos aquí directamente si necesitas
-                     console.log("Datos a enviar:", datos);
+                     ("Datos a enviar:", datos);
                  
                      // Si quieres hacer un fetch aquí, hazlo directamente
                      fetch(`${uri_flask}/crear_usuario`, {
@@ -129,7 +132,7 @@ function Panel_usuario(){
                      })
                      .then(res => res.json())
                      .then(data => {
-                       console.log("Respuesta del servidor:", data);
+                       ("Respuesta del servidor:", data);
                      })
                      .catch(error => console.error("Error al enviar:", error));
                      alert("Se creo el usuario exitosamente")
@@ -142,8 +145,8 @@ function Panel_usuario(){
         e.preventDefault();
         fetch(uri_flask+"/traer_todos_usuarios")
         .then(response=>response.json())
-        .then(data =>{set_lista_usuarios(data.usuarios);console.log(data.usuarios)})
-        .catch(error=> console.log(error));
+        .then(data =>{set_lista_usuarios(data.usuarios);(data.usuarios)})
+        .catch(error=> (error));
         
       }
     
@@ -156,7 +159,7 @@ function Panel_usuario(){
         const datos = Object.fromEntries(new FormData(e.currentTarget));
         datos["id_usuario"]= usuario_seleccionado
         datos["id_estado"] = estado_seleccionado
-        console.log("datos a enviar",datos);
+        ("datos a enviar",datos);
 
         fetch(uri_flask+"/actualizar_estadoxusuario",{
           method: 'POST',
@@ -167,7 +170,7 @@ function Panel_usuario(){
         })
         .then(res => res.json())
         .then(data => set_mensaje_back(data.mensaje))
-        .catch(error => console.log("error"+error));
+        .catch(error => ("error"+error));
         }
         
       function actualizar_estado_firma(e){
@@ -189,7 +192,7 @@ function Panel_usuario(){
         })
         .then(res => res.json())
         .then(data => set_mensaje_back(data.mensaje))
-        .catch(error => console.log("error"+error));
+        .catch(error => ("error"+error));
         }
       
         return (
@@ -559,7 +562,7 @@ function Panel_usuario(){
             }).then(respuesta => respuesta.json())
             .then(data => {set_estado_subida(data.mensaje)});
             
-        }catch (err){console.log(err)
+        }catch (err){(err)
         }
         
     }
@@ -568,7 +571,7 @@ function Panel_usuario(){
     if(datos_recibidos_login.cargo_id!=4){ 
       
       
-        console.log(aceptoPolitica)
+        (aceptoPolitica)
         
          return(
         <div className="min-h-screen w-screen bg-gray-900">
