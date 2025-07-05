@@ -157,8 +157,8 @@ function Panel_usuario(){
         return;}
         
         const datos = Object.fromEntries(new FormData(e.currentTarget));
-        datos["id_usuario"]= usuario_seleccionado
-        datos["id_estado"] = estado_seleccionado
+        datos["id_usuario"]= usuario_seleccionado;
+        datos["id_estado"] = estado_seleccionado;
         ("datos a enviar",datos);
 
         fetch(uri_flask+"/actualizar_estadoxusuario",{

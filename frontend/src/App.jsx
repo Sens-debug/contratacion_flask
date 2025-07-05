@@ -11,7 +11,7 @@ function App(){
   return(
       <Routes>
         <Route path='/' element={<Formulario_login/>}></Route>
-        <Route path='/app' element={<Panel_usuario/>}></Route>
+        <Route path='/app/*' element={<Panel_usuario/>}></Route>
         {/* <Route path='/'></Route> */}
       </Routes>    
   )
