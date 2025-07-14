@@ -20,12 +20,13 @@ class Firma_documentos():
         'area': area,
         'tipo_sangre':tipo_sangre,
         'fecha_nacimiento':fecha_nacimiento,
-        'fecha_actual':f"{datetime.datetime.now().day}/{datetime.datetime.now().month}/{datetime.datetime.now().year}",
+        'fecha_actual':f"{datetime.datetime.now().year}-{datetime.datetime.now().month}-{datetime.datetime.now().day}",
         'telefono':telefono,
         'fecha_dia':fechas[0],
         'fecha_mes':fechas[1],
         'fecha_año':fechas[2],
-        'fecha_final_contrato':datetime.timedelta(days=365)+datetime.datetime(fechas[2],fechas[1],fechas[0]),
+        'fecha_final_contrato':str(datetime.timedelta(days=365)+datetime.datetime(day=fechas[0],month=fechas[1],year=fechas[2]))[0:-9],
+        'fecha_final_contrato_6meses':str(datetime.timedelta(days=183)+datetime.datetime(day=fechas[0],month=fechas[1],year=fechas[2]))[0:-9],
         'firma': None
         }
         self.ruta_firma = os.path.abspath(ruta_firma)
@@ -61,7 +62,7 @@ class Firma_documentos():
             
             # creamos la carpeta de la persona
             # os.makedirs(f"{self.ruta_almacenamiento}\\{self.datos_a_diligenciar['nombre_completo']}", exist_ok=True)
-            documento_plantilla.save(fr'{self.ruta_carpeta_persona}\{nombre_archivo}_{self.datos_a_diligenciar["nombre_completo"]}_{self.datos_a_diligenciar["cedula_ciudadania"]}.docx')
+            documento_plantilla.save(fr'{self.ruta_carpeta_persona}\{nombre_archivo}.docx')
 
         print(ruta_carpeta_plantilla_administrativos)
         
@@ -83,7 +84,7 @@ class Firma_documentos():
             self.datos_a_diligenciar["firma"] = imagen_firma
             documento_plantilla.render(self.datos_a_diligenciar)
             # os.makedirs(f"{self.ruta_carpetas_plantillas}\\Formatos_Firmados\\Antibiotico\\{self.datos_a_diligenciar['nombre_completo']}", exist_ok=True)
-            documento_plantilla.save(fr'{self.ruta_carpeta_persona}\{nombre_archivo}_{self.datos_a_diligenciar["nombre_completo"]}_{self.datos_a_diligenciar["cedula_ciudadania"]}.docx')
+            documento_plantilla.save(fr'{self.ruta_carpeta_persona}\{nombre_archivo}.docx')
 
     def firmar_formatos_cuidador(self):
         ruta_carpeta_plantilla_cuidador= os.path.join(self.ruta_carpetas_plantillas, 'Plantillas_cuidador')
@@ -102,7 +103,7 @@ class Firma_documentos():
             print(self.ruta_firma)
             self.datos_a_diligenciar["firma"] = imagen_firma
             documento_plantilla.render(self.datos_a_diligenciar)
-            documento_plantilla.save(fr'{self.ruta_carpeta_persona}\{nombre_archivo}_{self.datos_a_diligenciar["nombre_completo"]}_{self.datos_a_diligenciar["cedula_ciudadania"]}.docx')
+            documento_plantilla.save(fr'{self.ruta_carpeta_persona}\{nombre_archivo}.docx')
 
     def firmar_formatos_permanentes(self):
         ruta_carpeta_plantilla_cuidador= os.path.join(self.ruta_carpetas_plantillas, 'Plantillas_permanente')
@@ -119,7 +120,7 @@ class Firma_documentos():
             print(self.ruta_firma)
             self.datos_a_diligenciar["firma"] = imagen_firma
             documento_plantilla.render(self.datos_a_diligenciar)
-            documento_plantilla.save(fr'{self.ruta_carpeta_persona}\{nombre_archivo}_{self.datos_a_diligenciar["nombre_completo"]}_{self.datos_a_diligenciar["cedula_ciudadania"]}.docx')
+            documento_plantilla.save(fr'{self.ruta_carpeta_persona}\{nombre_archivo}.docx')
 
     def firmar_formatos_profesionales(self):
         ruta_carpeta_plantilla_cuidador= os.path.join(self.ruta_carpetas_plantillas, 'Plantillas_profesionales')
@@ -136,7 +137,7 @@ class Firma_documentos():
             print(self.ruta_firma)
             self.datos_a_diligenciar["firma"] = imagen_firma
             documento_plantilla.render(self.datos_a_diligenciar)
-            documento_plantilla.save(fr'{self.ruta_carpeta_persona}\{nombre_archivo}_{self.datos_a_diligenciar["nombre_completo"]}_{self.datos_a_diligenciar["cedula_ciudadania"]}.docx')
+            documento_plantilla.save(fr'{self.ruta_carpeta_persona}\{nombre_archivo}.docx')
 
 
 # signer =Firma_documentos('','','','','','','','','','','','')
